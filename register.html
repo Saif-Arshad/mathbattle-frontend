@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register | MathBattle</title>
+
+    <!-- Tailwind (stand-alone CDN build) -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui'] },
+                    colors: { primary: { DEFAULT: '#2563eb', 600: '#1d4ed8' } },
+                    dropShadow: { glow: '0 0 8px rgba(59, 130, 246, 0.45)' }
+                }
+            }
+        };
+    </script>
+
+    <!-- Heroicons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+
+    <style>
+        .glass {
+            background: rgba(17, 24, 39, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(14px);
+        }
+    </style>
+</head>
+
+<body
+    class="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-neutral-900 text-gray-100 flex items-center justify-center">
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-5 right-5 space-y-2 z-50"></div>
+
+    <div class="mx-auto flex w-full max-w-6xl shadow-lg rounded-3xl overflow-hidden">
+        <div class="hidden lg:block w-1/2">
+            <img src="./Assets/register.jpg" alt="Student practicing math on a tablet"
+                class="h-full w-full object-cover" />
+        </div>
+
+        <div class="w-full lg:w-1/2 p-8 sm:p-12 md:p-16 lg:p-20 glass">
+            <header class="mb-10 text-center">
+                <h1 class="text-3xl font-extrabold tracking-tight drop-shadow-glow">
+                    Create your account
+                </h1>
+                <p class="mt-1 text-gray-400 text-sm">
+                    Join MathBattle and sharpen your skills!
+                </p>
+            </header>
+
+            <form id="registerForm" class="space-y-6">
+                <!-- Full Name Field -->
+                <div>
+                    <label for="fullName" class="block text-sm font-medium mb-1">Full Name</label>
+                    <div class="relative">
+                        <input type="text" id="fullName" name="fullName" placeholder="Jane Doe" autocomplete="name"
+                            required
+                            class="peer w-full rounded-lg border border-neutral-700 bg-neutral-800/70 py-3 pl-10 pr-4 text-sm placeholder-gray-500 focus:border-primary focus:ring-primary/40 focus:outline-none transition" />
+                        <i data-feather="user"
+                            class="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500 peer-focus:text-primary"></i>
+                    </div>
+                </div>
+
+                <!-- Email Field -->
+                <div>
+                    <label for="email" class="block text-sm font-medium mb-1">Email</label>
+                    <div class="relative">
+                        <input type="email" id="email" name="email" placeholder="jane@example.com" autocomplete="email"
+                            required
+                            class="peer w-full rounded-lg border border-neutral-700 bg-neutral-800/70 py-3 pl-10 pr-4 text-sm placeholder-gray-500 focus:border-primary focus:ring-primary/40 focus:outline-none transition" />
+                        <i data-feather="mail"
+                            class="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500 peer-focus:text-primary"></i>
+                    </div>
+                </div>
+
+                <!-- Password Field -->
+                <div>
+                    <label for="password" class="block text-sm font-medium mb-1">Password</label>
+                    <div class="relative">
+                        <input type="password" id="password" name="password" placeholder="••••••••"
+                            autocomplete="new-password" required
+                            class="peer w-full rounded-lg border border-neutral-700 bg-neutral-800/70 py-3 pl-10 pr-4 text-sm placeholder-gray-500 focus:border-primary focus:ring-primary/40 focus:outline-none transition" />
+                        <i data-feather="lock"
+                            class="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500 peer-focus:text-primary"></i>
+                    </div>
+                </div>
+
+                <!-- Submit Button with Spinner -->
+                <button id="submitBtn" type="submit"
+                    class="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-[#9D7BED] hover:bg-primary-600 transition focus:outline-none focus:ring-2 focus:ring-primary/50 font-semibold">
+                    <span id="btnText">Sign Up</span>
+                    <svg id="btnSpinner" class="hidden animate-spin h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                    </svg>
+                </button>
+            </form>
+
+            <div class="my-8 flex items-center gap-3">
+                <hr class="flex-grow border-neutral-700" />
+                <span class="text-xs uppercase tracking-wider text-gray-500">or</span>
+                <hr class="flex-grow border-neutral-700" />
+            </div>
+            <p class="text-center text-sm text-gray-400">
+                Already have an account?
+                <a href="/Frontend/login.html" class="font-medium text-primary hover:underline">Log in here</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        feather.replace();
+
+        function showToast(message, type = 'error') {
+            const colors = {
+                success: 'bg-green-600',
+                error: 'bg-red-600'
+            };
+            const toast = document.createElement('div');
+            toast.textContent = message;
+            toast.className = `text-white px-4 py-2 rounded shadow ${colors[type]}`;
+            document.getElementById('toast-container').appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        const form = document.getElementById('registerForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const btnSpinner = document.getElementById('btnSpinner');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!fullName) return showToast('Full name is required.');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) return showToast('Please enter a valid email.');
+            if (password.length < 6) return showToast('Password must be at least 6 characters.');
+
+            submitBtn.disabled = true;
+            btnText.textContent = 'Signing Up...';
+            btnSpinner.classList.remove('hidden');
+
+            try {
+                const res = await fetch('http://127.0.0.1:8000/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        full_name: fullName,
+                        email,
+                        password,
+                        role: 'student'
+                    })
+                });
+
+                const data = await res.json();
+                if (!res.ok) {
+                    const msg = data.detail || 'Registration failed';
+                    return showToast(msg, 'error');
+                }
+
+                showToast('Registration successful! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = '/Frontend/login.html';
+                }, 1500);
+            } catch (err) {
+                console.error(err);
+                showToast('Network error. Please try again.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                btnText.textContent = 'Sign Up';
+                btnSpinner.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+
+</html>
