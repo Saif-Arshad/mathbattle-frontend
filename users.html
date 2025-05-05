@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage Users | MathBattle</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+</head>
+
+<body class="bg-gradient-to-br from-[#1A1B1F] via-[#111113] to-[#0A0A0D] min-h-screen text-gray-100">
+    <!-- Header -->
+    <header class="bg-transparent py-6">
+        <div class="max-w-6xl mx-auto px-4 flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-white">Manage Users</h1>
+            <button id="logoutBtn" class="px-4 py-2 bg-[#FF8C42] hover:bg-[#E67635] rounded-lg font-semibold">
+                Logout
+            </button>
+        </div>
+    </header>
+
+    <!-- Toast container -->
+    <div id="toast-container" class="fixed top-5 right-5 space-y-2 z-50"></div>
+
+    <!-- Main content -->
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        <p class="mb-6 text-gray-400">Here you can assign teachers or parents to student accounts, or delete users.</p>
+
+        <!-- Loading spinner -->
+        <div id="loading" class="flex justify-center items-center py-20">
+            <svg class="animate-spin h-10 w-10 text-[#9D7BED]" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+            </svg>
+        </div>
+
+        <!-- Table container -->
+        <div id="tableContainer" class="overflow-x-auto hidden">
+            <table class="min-w-full table-auto rounded-lg overflow-hidden border border-gray-700">
+                <thead>
+                    <tr class="bg-[#2D3748]">
+                        <th class="px-6 py-3 text-sm font-semibold text-gray-200">ID</th>
+                        <th class="px-6 py-3 text-sm font-semibold text-gray-200">Full Name</th>
+                        <th class="px-6 py-3 text-sm font-semibold text-gray-200">Email</th>
+                        <th class="px-6 py-3 text-sm font-semibold text-gray-200">Role</th>
+                        <th class="px-6 py-3 text-sm font-semibold text-gray-200">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody" class="divide-y divide-gray-700"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Assign Modal -->
+    <div id="assignModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden">
+        <div class="bg-[#1F2937] rounded-2xl p-6 w-full max-w-lg">
+            <h2 id="modalTitle" class="text-xl font-bold text-white mb-4"></h2>
+            <div class="mb-4">
+                <p id="currentAssignment" class="text-sm text-gray-300 mb-2"></p>
+                <label id="modalSelectLabel" class="block text-sm font-medium text-gray-300 mb-2"></label>
+                <select id="modalSelect"
+                    class="w-full bg-[#2D3748] border border-gray-600 rounded py-2 px-3 text-gray-100"></select>
+            </div>
+            <div class="flex justify-end gap-3">
+                <button id="modalCancelBtn"
+                    class="px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded">Cancel</button>
+                <button id="modalConfirmBtn"
+                    class="flex items-center px-4 py-2 bg-[#9D7BED] hover:bg-[#7951B2] text-[#0A0A0D] font-semibold rounded">
+                    <svg id="modalSpinner" class="animate-spin h-5 w-5 mr-2 text-[#0A0A0D] hidden"
+                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                    </svg>
+                    <span id="modalConfirmText">Confirm</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showToast(msg, type = 'success') {
+            const colors = { success: 'bg-green-600', error: 'bg-red-600' };
+            const d = document.createElement('div');
+            d.textContent = msg;
+            d.className = `text-white px-4 py-2 rounded shadow ${colors[type]}`;
+            document.getElementById('toast-container').appendChild(d);
+            setTimeout(() => d.remove(), 3000);
+        }
+
+        document.getElementById('logoutBtn').onclick = () => {
+            localStorage.removeItem('mathbattle');
+            location = './login.html';
+        };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const raw = localStorage.getItem('mathbattle');
+            if (!raw) return (location = './login.html');
+            const session = JSON.parse(raw);
+            if (session.userType !== 'admin') {
+                showToast('Access denied', 'error');
+                return (location = './dashboard.html');
+            }
+
+            try {
+                const res = await fetch('http://127.0.0.1:8000/admin/all-users', {
+                    headers: { 'Authorization': `Bearer ${session.access_token}` }
+                });
+                if (!res.ok) throw new Error((await res.json()).detail || 'Failed to load');
+                const users = await res.json();
+                const teachers = users.filter(u => u.role === 'teacher');
+                const parents = users.filter(u => u.role === 'parent');
+                const tbody = document.getElementById('usersTableBody');
+
+                users.forEach(u => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'odd:bg-[#111827] even:bg-[#1F2937] hover:bg-[#272c31]';
+                    let actions = `<button data-id="${String(u._id)}" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg mr-2 deleteBtn flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        Delete
+                    </button>`;
+                    if (u.role === 'student') {
+                        actions += `<button data-id="${String(u._id)}" class="bg-[#9D7BED] hover:bg-[#7951B2] text-[#0A0A0D] px-3 py-1 rounded-lg mr-2 assignTeacherBtn flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                            Teacher
+                        </button>`;
+                        actions += `<button data-id="${String(u._id)}" class="bg-[#FF8C42] hover:bg-[#E67635] text-[#0A0A0D] px-3 py-1 rounded-lg assignParentBtn flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                            Parent
+                        </button>`;
+                    }
+                    tr.innerHTML = `
+                        <td class="px-6 py-4">${u._id}</td>
+                        <td class="px-6 py-4">${u.full_name || '-'}</td>
+                        <td class="px-6 py-4">${u.email}</td>
+                        <td class="px-6 py-4 capitalize">${u.role}</td>
+                        <td class="px-6 py-4 flex">${actions}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('tableContainer').classList.remove('hidden');
+
+                // Delete handlers
+                document.querySelectorAll('.deleteBtn').forEach(b => {
+                    b.onclick = async () => {
+                        if (!confirm('Delete?')) return;
+                        try {
+                            await fetch(`http://127.0.0.1:8000/admin/${b.dataset.id}`, {
+                                method: 'DELETE',
+                                headers: { 'Authorization': `Bearer ${session.access_token}` }
+                            });
+                            b.closest('tr').remove();
+                            showToast('Deleted');
+                        } catch (e) {
+                            showToast(e.message, 'error');
+                        }
+                    };
+                });
+
+                // Modal references
+                const modal = document.getElementById('assignModal');
+                const mt = document.getElementById('modalTitle');
+                const msl = document.getElementById('modalSelectLabel');
+                const ms = document.getElementById('modalSelect');
+                const mc = document.getElementById('modalConfirmBtn');
+                const spi = document.getElementById('modalSpinner');
+                const mct = document.getElementById('modalConfirmText');
+                const cancel = document.getElementById('modalCancelBtn');
+                const currentAssignmentEl = document.getElementById('currentAssignment');
+                let curType, curId;
+
+                function openModal(type, student) {
+                    curType = type;
+                    curId = student._id;
+                    mt.textContent = `Assign ${type} to ${student.full_name || 'Unnamed'}`;
+                    msl.textContent = `Select ${type}`;
+
+                    // Determine current assignment
+                    const currentAssignmentId = type === 'teacher' ? student.teacher : student.parent;
+                    const assignmentList = type === 'teacher' ? teachers : parents;
+                    const currentAssignmentUser = currentAssignmentId
+                        ? assignmentList.find(u => String(u._id) === String(currentAssignmentId))
+                        : null;
+
+                    // Display current assignment
+                    if (currentAssignmentUser) {
+                        currentAssignmentEl.textContent = `Currently assigned: ${currentAssignmentUser.full_name || currentAssignmentUser.email}`;
+                    } else {
+                        currentAssignmentEl.textContent = `No ${type} assigned`;
+                    }
+
+                    // Populate select options and pre-select current assignment
+                    ms.innerHTML = '';
+                    assignmentList.forEach(x => {
+                        const option = document.createElement('option');
+                        option.value = String(x._id);
+                        option.textContent = x.full_name || x.email;
+                        if (currentAssignmentId && String(x._id) === String(currentAssignmentId)) {
+                            option.selected = true;
+                        }
+                        ms.appendChild(option);
+                    });
+
+                    mct.textContent = 'Assign';
+                    spi.classList.add('hidden');
+                    mc.disabled = false;
+                    modal.classList.remove('hidden');
+                }
+
+                document.querySelectorAll('.assignTeacherBtn').forEach(b => {
+                    b.onclick = () => {
+                        const student = users.find(u => String(u._id) === b.dataset.id);
+                        if (student) {
+                            openModal('teacher', student);
+                        } else {
+                            showToast('Student not found', 'error');
+                        }
+                    };
+                });
+
+                document.querySelectorAll('.assignParentBtn').forEach(b => {
+                    b.onclick = () => {
+                        const student = users.find(u => String(u._id) === b.dataset.id);
+                        if (student) {
+                            openModal('parent', student);
+                        } else {
+                            showToast('Student not found', 'error');
+                        }
+                    };
+                });
+
+                cancel.onclick = () => modal.classList.add('hidden');
+
+                mc.onclick = async () => {
+                    mc.disabled = true;
+                    spi.classList.remove('hidden');
+                    try {
+                        await fetch(`http://127.0.0.1:8000/admin/${String(curId)}/${curType}?${curType}_id=${ms.value}`, {
+                            method: 'POST',
+                            headers: { 'Authorization': `Bearer ${session.access_token}` }
+                        });
+                        showToast('Assigned');
+                        modal.classList.add('hidden');
+                    } catch (e) {
+                        showToast(e.message, 'error');
+                    } finally {
+                        mc.disabled = false;
+                        spi.classList.add('hidden');
+                    }
+                };
+            } catch (e) {
+                showToast(e.message, 'error');
+            }
+        });
+    </script>
+</body>
+
+</html>

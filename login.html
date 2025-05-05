@@ -123,12 +123,10 @@
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
 
-            // Simple validation
             if (!email || !password) {
                 return showToast('Email and password are required.');
             }
 
-            // Loading state
             submitBtn.disabled = true;
             btnText.textContent = 'Signing In...';
             btnSpinner.classList.remove('hidden');
@@ -136,7 +134,7 @@
             try {
                 const body = new URLSearchParams({
                     username: email,
-                    password: password
+                    password
                 });
 
                 const res = await fetch('http://127.0.0.1:8000/auth/login', {
@@ -144,28 +142,35 @@
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: body.toString()
                 });
-
                 const data = await res.json();
-                console.log("🚀 ~ form.addEventListener ~ data:", data)
+
                 if (!res.ok) {
-                    const msg = data.detail || 'Login failed';
-                    showToast(msg, 'error');
-                } else {
-                    // Save to localStorage under "mathbattle"
-                    localStorage.setItem('mathbattle', JSON.stringify({
-                        email: email,
-                        access_token: data.access_token,
-                        token_type: data.token_type
-                    }));
-                    showToast('Login successful! Redirecting...', 'success');
-                    setTimeout(() => {
-                        window.location.href = './index.html';
-                    }, 1000);
+                    return showToast(data.detail || 'Login failed', 'error');
                 }
+
+                const session = {
+                    email,
+                    access_token: data.access_token,
+                    token_type: data.token_type,
+                    userType: data.role
+                };
+                localStorage.setItem('mathbattle', JSON.stringify(session));
+
+                showToast('Login successful! Redirecting...', 'success');
+
+                setTimeout(() => {
+                    if (session.userType && session.userType !== 'student') {
+                        window.location.href = './dashboard.html';
+                    } else {
+                        window.location.href = './index.html';
+                    }
+                }, 1000);
+
             } catch (err) {
                 console.error(err);
                 showToast('Network error. Please try again.', 'error');
             } finally {
+                // Reset button
                 submitBtn.disabled = false;
                 btnText.textContent = 'Sign In';
                 btnSpinner.classList.add('hidden');
