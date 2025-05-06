@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Challenge – MathBattle</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+</head>
+
+<body class="bg-black text-gray-100 min-h-screen flex flex-col">
+    <!-- Header / Back -->
+    <nav class="bg-gray-800">
+        <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 flex h-16 items-center">
+            <button id="backBtn" class="text-gray-300 hover:text-white flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Back to Subjects
+            </button>
+        </div>
+    </nav>
+
+    <main class="flex-grow max-w-5xl w-full mx-auto p-4">
+        <!-- Progress -->
+        <div id="progressContainer" class="mb-6">
+            <div class="flex justify-between mb-1">
+                <span id="questionCounter" class="text-sm">Question 1 of 1</span>
+                <span id="scoreDisplay" class="text-sm">Score: 0</span>
+            </div>
+            <div class="h-2 bg-gray-700 rounded overflow-hidden">
+                <div id="progressBar" class="h-full bg-gradient-to-r from-[#FF8C42] to-[#E67635] w-0"></div>
+            </div>
+        </div>
+
+        <!-- Question Card -->
+        <div id="questionCard" class="bg-gray-900 p-8 rounded-lg shadow-lg mb-6">
+            <h2 id="questionText" class="text-2xl font-semibold mb-4 leading-relaxed flex items-center">
+                <svg class="animate-spin h-5 w-5 mr-3 text-[#9D7BED]" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                Loading...
+            </h2>
+            <div id="optionsList" class="space-y-4"></div>
+            <div id="feedback" class="mt-4 text-lg font-medium"></div>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex justify-end">
+            <button id="submitBtn"
+                class="px-6 py-2 bg-[#FF8C42] hover:bg-[#E67635] text-black font-semibold rounded-lg disabled:opacity-50 transition duration-300"
+                disabled>
+                Submit
+            </button>
+        </div>
+
+        <!-- Completion Screen -->
+        <div id="completionScreen" class="hidden text-center mt-12">
+            <div class="text-6xl text-[#9D7BED] mb-6">🎉</div>
+            <h2 class="text-4xl font-bold mb-4">Challenge Complete!</h2>
+            <p class="text-xl mb-6" id="finalScoreText">You scored 0/0 points</p>
+            <button id="finishBtn"
+                class="px-6 py-2 bg-[#FF8C42] hover:bg-[#E67635] text-black font-semibold rounded-lg transition duration-300">
+                Finish
+            </button>
+        </div>
+    </main>
+
+    <!-- Toast -->
+    <div id="toast-container" class="fixed top-5 right-5 space-y-2 z-50"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const backBtn = document.getElementById('backBtn');
+            backBtn.addEventListener('click', () => window.location.href = './subjects.html');
+
+            function showToast(msg, type = 'error') {
+                const colors = { success: 'bg-green-600', error: 'bg-red-600' };
+                const d = document.createElement('div');
+                d.textContent = msg;
+                d.className = `text-white px-4 py-2 rounded shadow ${colors[type]} fixed top-5 right-5 z-50`;
+                document.body.appendChild(d);
+                setTimeout(() => d.remove(), 3000);
+            }
+
+            const progressBar = document.getElementById('progressBar');
+            const questionCounter = document.getElementById('questionCounter');
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const questionText = document.getElementById('questionText');
+            const optionsList = document.getElementById('optionsList');
+            const submitBtn = document.getElementById('submitBtn');
+            const feedback = document.getElementById('feedback');
+            const completionScreen = document.getElementById('completionScreen');
+            const finalScoreText = document.getElementById('finalScoreText');
+            const finishBtn = document.getElementById('finishBtn');
+
+            let questions = [];
+            let totalPoints = 0;
+            let current = 0;
+            let score = 0;
+            let answered = false;
+
+            const params = new URLSearchParams(window.location.search);
+            const subjectId = params.get('subject');
+            if (!subjectId) {
+                showToast('No subject specified', 'error');
+                return;
+            }
+
+            // load challenges
+            fetch(`http://127.0.0.1:8000/challenges/subject/${subjectId}`)
+                .then(r => r.json())
+                .then(data => {
+                    questions = data;
+                    totalPoints = questions.reduce((sum, q) => sum + (q.points || 1), 0);
+                    if (!Array.isArray(questions) || questions.length === 0) {
+                        showToast('No challenges found', 'error');
+                        questionText.innerHTML = 'No challenges available.';
+                        return;
+                    }
+                    renderQuestion();
+                })
+                .catch(() => showToast('Failed loading challenges', 'error'));
+
+            function renderQuestion() {
+                const q = questions[current];
+                const total = questions.length;
+                answered = false;
+                submitBtn.disabled = true;
+                feedback.textContent = '';
+                questionCounter.textContent = `Question ${current + 1} of ${total}`;
+                scoreDisplay.textContent = `Score: ${score} pts`;
+                progressBar.style.width = `${((current) / total) * 100}%`;
+                questionText.textContent = q.question;
+                optionsList.innerHTML = '';
+                q.options.forEach((o, i) => {
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center space-x-3 cursor-pointer p-3 border rounded hover:bg-gray-800 hover:border-[#FF8C42]';
+                    div.innerHTML = `
+            <input type="radio" name="opt" id="opt${i}" value="${o.text}" class="text-[#FF8C42]" />
+            <label for="opt${i}" class="flex-1">${o.text}</label>
+          `;
+                    div.onclick = () => {
+                        if (answered) return;
+                        div.querySelector('input').checked = true;
+                        submitBtn.disabled = false;
+                    };
+                    optionsList.appendChild(div);
+                });
+            }
+
+            submitBtn.addEventListener('click', () => {
+                if (answered) return;
+                const selected = document.querySelector('input[name="opt"]:checked');
+                if (!selected) return showToast('Select an answer', 'error');
+                answered = true;
+                const ans = selected.value;
+                const correct = questions[current].correctOption;
+                const pts = questions[current].points || 1;
+                if (ans === correct) {
+                    score += pts;
+                    feedback.textContent = `Correct! +${pts} pts`;
+                    feedback.className = 'mt-4 text-green-400 font-semibold';
+                } else {
+                    feedback.textContent = `Incorrect. Answer: ${correct}`;
+                    feedback.className = 'mt-4 text-red-400 font-semibold';
+                }
+                submitBtn.textContent = (current < questions.length - 1) ? 'Next' : 'Finish';
+                submitBtn.disabled = false;
+
+                if (current < questions.length - 1) {
+                    submitBtn.onclick = () => {
+                        current++;
+                        submitBtn.textContent = 'Submit';
+                        renderQuestion();
+                    };
+                } else {
+                    submitBtn.onclick = showCompletion;
+                }
+            });
+
+            function showCompletion() {
+                document.getElementById('progressContainer').classList.add('hidden');
+                document.getElementById('questionCard').classList.add('hidden');
+                submitBtn.parentElement.classList.add('hidden');
+                finalScoreText.textContent = `You scored ${score} of ${totalPoints} points`;
+                completionScreen.classList.remove('hidden');
+            }
+
+            finishBtn.addEventListener('click', async () => {
+                const session = JSON.parse(localStorage.getItem('mathbattle') || '{}');
+                if (!session.userId) {
+                    window.location.href = './index.html';
+                    return;
+                }
+                const studentId = session.userId;
+                try {
+                    await fetch('http://127.0.0.1:8000/progress/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${session.access_token}`
+                        },
+                        body: JSON.stringify({
+                            student_id: session.userId,       // <— you must include this
+                            subject_id: subjectId,
+                            points: score
+                        })
+                    });
+                    showToast('Progress recorded', 'success');
+                } catch (e) {
+                    showToast('Failed to record progress', 'error');
+                } finally {
+                    window.location.href = './subjects.html';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
