@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Math Puzzle | MathBattle</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-[#1A1B1F] via-[#111113] to-[#0A0A0D] flex items-center justify-center">
+    <div id="toast-container" class="fixed top-4 right-4 space-y-2 z-50"></div>
+    <section class="w-full max-w-4xl px-4 py-16 md:py-24">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold mb-3 text-white">Math Puzzle</h1>
+            <p class="text-lg text-[#C0BFC2] mx-auto max-w-3xl">
+                Use the given numbers and operations (+, -, *, /) to form an expression equal to the target number. Use
+                each number exactly once!
+            </p>
+        </div>
+
+        <div class="bg-[#1F2937] rounded-2xl shadow-xl border-2 border-[#2D2E32] max-w-2xl mx-auto p-6 space-y-6">
+            <!-- Header -->
+            <div class="flex items-center gap-2">
+                <svg class="h-6 w-6 text-[#9D7BED]" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+                <span class="text-xl font-semibold text-white">Math Puzzle Challenge</span>
+            </div>
+
+            <!-- Target -->
+            <div class="text-center">
+                <h3 class="text-sm font-medium text-[#C0BFC2]">Target Number</h3>
+                <div id="target" class="text-4xl font-bold text-[#9D7BED]">--</div>
+            </div>
+
+            <!-- Numbers Grid -->
+            <div id="numbers-grid" class="grid grid-cols-4 gap-3">
+                <!-- number tiles injected by JS -->
+            </div>
+
+            <!-- Expression Input -->
+            <div class="space-y-2">
+                <label for="expression" class="block text-sm font-medium text-[#C0BFC2]">Your Expression:</label>
+                <input id="expression" type="text" placeholder="e.g., 4+7*8/9"
+                    class="w-full p-3 text-lg bg-[#111827] text-white border-2 border-[#2D2E32] rounded-md focus:border-[#9D7BED] focus:ring focus:ring-[#9D7BED]/20 transition" />
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex justify-between">
+                <a href="../index.html">
+
+                    <button id="back-btn"
+                        class="px-6 py-2 border border-[#C0BFC2] text-[#C0BFC2] rounded-lg hover:bg-[#2D2E32] transition">
+                        Back to Games
+                    </button>
+                </a>
+                <button id="check-btn"
+                    class="px-6 py-2 bg-[#9D7BED] text-[#0A0A0D] rounded-lg font-semibold hover:bg-[#7951B2] transition">
+                    Check Answer
+                </button>
+            </div>
+
+            <!-- Result Message -->
+            <div id="result-msg" class="text-center text-lg font-medium"></div>
+        </div>
+    </section>
+
+    <script>
+        const targetEl = document.getElementById('target');
+        const numbersGrid = document.getElementById('numbers-grid');
+        const exprInput = document.getElementById('expression');
+        const checkBtn = document.getElementById('check-btn');
+        const backBtn = document.getElementById('back-btn');
+        const resultMsg = document.getElementById('result-msg');
+        const toastContainer = document.getElementById('toast-container');
+
+        let puzzle = {
+            target: 24,
+            numbers: [4, 7, 8, 9]
+        };
+
+        function showToast(title, desc, variant = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `flex flex-col p-3 rounded shadow text-white ${variant === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
+            toast.innerHTML = `<strong>${title}</strong><span>${desc}</span>`;
+            toastContainer.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function renderPuzzle() {
+            targetEl.textContent = puzzle.target;
+            numbersGrid.innerHTML = '';
+            puzzle.numbers.forEach(num => {
+                const tile = document.createElement('div');
+                tile.className = 'bg-[#2D3748] text-white text-2xl font-bold p-4 rounded-lg flex items-center justify-center border-2 border-[#2D2E32]';
+                tile.textContent = num;
+                numbersGrid.appendChild(tile);
+            });
+        }
+
+        function checkAnswer() {
+            const expr = exprInput.value;
+            let temp = expr;
+            let valid = true;
+            puzzle.numbers.forEach(n => {
+                const s = n.toString();
+                if (temp.includes(s)) temp = temp.replace(s, ''); else valid = false;
+            });
+            if (!valid) return showToast('Invalid Expression', 'Use each number exactly once', 'error');
+
+            try {
+                // eslint-disable-next-line no-eval
+                const result = eval(expr);
+                if (result === puzzle.target) {
+                    showToast('Correct!', 'You solved the puzzle.');
+                    resultMsg.className = 'text-center text-green-400';
+                    resultMsg.textContent = 'Correct! Great job!';
+                } else {
+                    showToast('Incorrect', `You got ${result}, not ${puzzle.target}`, 'error');
+                    resultMsg.className = 'text-center text-red-500';
+                    resultMsg.textContent = `Incorrect. Try again.`;
+                }
+            } catch (e) {
+                showToast('Invalid Expression', 'Check your syntax', 'error');
+                resultMsg.className = 'text-center text-red-500';
+                resultMsg.textContent = 'Invalid expression.';
+            }
+        }
+
+        checkBtn.addEventListener('click', checkAnswer);
+        backBtn.addEventListener('click', () => window.location.href = '/games');
+
+        renderPuzzle();
+    </script>
+</body>
+
+</html>

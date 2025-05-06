@@ -4,219 +4,296 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Challenge – MathBattle</title>
+    <title>Challenge | MathBattle</title>
+
+    <!-- Tailwind + Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap"
+        rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui'] },
+                extend: {
+                    colors: {
+                        brand: { DEFAULT: '#9D7BED', dark: '#7951B2' },
+                        accent: { DEFAULT: '#FF8C42', dark: '#E67635' },
+                        neutral: { 900: '#1A1B1F', 800: '#111113', 700: '#0A0A0D' },
+                    },
+                    dropShadow: { soft: '0 8px 24px rgba(157,123,237,.25)' },
+                    keyframes: {
+                        drift: { to: { backgroundPosition: '-800px 800px' } },
+                        shake: {
+                            '0%,100%': { transform: 'translateX(0)' },
+                            '25%': { transform: 'translateX(-4px)' },
+                            '75%': { transform: 'translateX(4px)' }
+                        }
+                    },
+                    animation: { drift: 'drift 60s linear infinite', shake: 'shake .4s ease-in-out' }
+                }
+            }
+        };
+    </script>
+
+    <style>
+        /* ––– global background & starfield ––– */
+        body {
+            background: linear-gradient(135deg, #1A1B1F 0%, #111113 50%, #0A0A0D 100%);
+            min-height: 100vh;
+            font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+            color: #e5e5e5;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .starfield {
+            pointer-events: none;
+            position: fixed;
+            inset: 0;
+            background-image:
+                radial-gradient(2px 2px at 25% 40%, rgba(157, 123, 237, .8) 0, transparent 60%),
+                radial-gradient(1px 1px at 70% 70%, rgba(255, 140, 66, .8) 0, transparent 60%),
+                radial-gradient(1.5px 1.5px at 40% 80%, rgba(255, 255, 255, .6) 0, transparent 60%);
+            background-size: 400px 400px;
+            animation: drift;
+            opacity: .35;
+        }
+
+        /* ––– frosted card ––– */
+        .glass {
+            background: rgba(45, 46, 50, .65);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-radius: 1rem;
+            transition: transform .25s ease, box-shadow .25s ease;
+        }
+
+        .glass:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(157, 123, 237, .25);
+        }
+    </style>
 </head>
 
-<body class="bg-black text-gray-100 min-h-screen flex flex-col">
-    <!-- Header / Back -->
-    <nav class="bg-gray-800">
-        <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 flex h-16 items-center">
+<body>
+    <div class="starfield"></div>
+
+    <!-- ─── NAVBAR ───────────────────────────────────────── -->
+    <nav class="bg-neutral-800/60 backdrop-blur-md shadow-lg">
+        <div class="max-w-7xl w-full mx-auto h-16 flex items-center px-4 sm:px-6 lg:px-8">
             <button id="backBtn" class="text-gray-300 hover:text-white flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
-                Back to Subjects
+                Back&nbsp;to&nbsp;Subjects
             </button>
         </div>
     </nav>
 
-    <main class="flex-grow max-w-5xl w-full mx-auto p-4">
+    <!-- ─── MAIN ─────────────────────────────────────────── -->
+    <main class="flex-grow max-w-5xl w-full mx-auto p-6">
         <!-- Progress -->
-        <div id="progressContainer" class="mb-6">
-            <div class="flex justify-between mb-1">
-                <span id="questionCounter" class="text-sm">Question 1 of 1</span>
-                <span id="scoreDisplay" class="text-sm">Score: 0</span>
+        <section id="progressContainer" class="mb-8">
+            <div class="flex justify-between mb-1 text-sm">
+                <span id="questionCounter">Question 1 of 1</span>
+                <span id="scoreDisplay">Score: 0</span>
             </div>
-            <div class="h-2 bg-gray-700 rounded overflow-hidden">
-                <div id="progressBar" class="h-full bg-gradient-to-r from-[#FF8C42] to-[#E67635] w-0"></div>
+            <div class="h-2 bg-neutral-800 rounded overflow-hidden">
+                <div id="progressBar"
+                    class="h-full bg-gradient-to-r from-accent to-accent-dark w-0 transition-all duration-300"></div>
             </div>
-        </div>
+        </section>
 
         <!-- Question Card -->
-        <div id="questionCard" class="bg-gray-900 p-8 rounded-lg shadow-lg mb-6">
-            <h2 id="questionText" class="text-2xl font-semibold mb-4 leading-relaxed flex items-center">
-                <svg class="animate-spin h-5 w-5 mr-3 text-[#9D7BED]" viewBox="0 0 24 24">
+        <section id="questionCard" class="glass p-8 shadow-lg mb-8">
+            <h2 id="questionText" class="text-2xl font-semibold mb-6 flex items-center">
+                <svg class="animate-spin h-5 w-5 mr-3 text-brand" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                 </svg>
-                Loading...
+                Loading…
             </h2>
             <div id="optionsList" class="space-y-4"></div>
-            <div id="feedback" class="mt-4 text-lg font-medium"></div>
-        </div>
+            <div id="feedback" class="mt-6 text-lg font-semibold"></div>
+        </section>
 
         <!-- Controls -->
         <div class="flex justify-end">
-            <button id="submitBtn"
-                class="px-6 py-2 bg-[#FF8C42] hover:bg-[#E67635] text-black font-semibold rounded-lg disabled:opacity-50 transition duration-300"
-                disabled>
+            <button id="submitBtn" class="px-8 py-3 bg-accent hover:bg-accent-dark font-bold text-[#0A0A0D] rounded-lg
+                     disabled:opacity-50 transition shadow-lg">
                 Submit
             </button>
         </div>
 
-        <!-- Completion Screen -->
-        <div id="completionScreen" class="hidden text-center mt-12">
-            <div class="text-6xl text-[#9D7BED] mb-6">🎉</div>
+        <!-- Completion -->
+        <div id="completionScreen" class="hidden text-center mt-16">
+            <div class="text-6xl text-brand mb-6">🎉</div>
             <h2 class="text-4xl font-bold mb-4">Challenge Complete!</h2>
-            <p class="text-xl mb-6" id="finalScoreText">You scored 0/0 points</p>
+            <p id="finalScoreText" class="text-xl mb-8">You scored 0/0 points</p>
             <button id="finishBtn"
-                class="px-6 py-2 bg-[#FF8C42] hover:bg-[#E67635] text-black font-semibold rounded-lg transition duration-300">
+                class="px-8 py-3 bg-accent hover:bg-accent-dark font-bold text-[#0A0A0D] rounded-lg shadow-lg">
                 Finish
             </button>
         </div>
     </main>
 
-    <!-- Toast -->
+    <!-- ─── TOAST CONTAINER ──────────────────────────────── -->
     <div id="toast-container" class="fixed top-5 right-5 space-y-2 z-50"></div>
 
+    <!-- ─── LOGIC ────────────────────────────────────────── -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const backBtn = document.getElementById('backBtn');
-            backBtn.addEventListener('click', () => window.location.href = './subjects.html');
+        /* tiny toast */
+        function toast(msg, type = 'error') {
+            const colors = { success: 'bg-green-600', error: 'bg-red-600' };
+            const el = document.createElement('div');
+            el.textContent = msg;
+            el.className = `px-4 py-2 text-white rounded shadow ${colors[type]} animate-fade`;
+            document.getElementById('toast-container').appendChild(el);
+            setTimeout(() => el.remove(), 3000);
+        }
 
-            function showToast(msg, type = 'error') {
-                const colors = { success: 'bg-green-600', error: 'bg-red-600' };
-                const d = document.createElement('div');
-                d.textContent = msg;
-                d.className = `text-white px-4 py-2 rounded shadow ${colors[type]} fixed top-5 right-5 z-50`;
-                document.body.appendChild(d);
-                setTimeout(() => d.remove(), 3000);
-            }
+        /* ─── DOM refs ─── */
+        const backBtn = document.getElementById('backBtn');
+        const progressBar = document.getElementById('progressBar');
+        const questionCounter = document.getElementById('questionCounter');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const questionText = document.getElementById('questionText');
+        const optionsList = document.getElementById('optionsList');
+        const submitBtn = document.getElementById('submitBtn');
+        const feedback = document.getElementById('feedback');
+        const completionScreen = document.getElementById('completionScreen');
+        const finalScoreText = document.getElementById('finalScoreText');
+        const finishBtn = document.getElementById('finishBtn');
 
-            const progressBar = document.getElementById('progressBar');
-            const questionCounter = document.getElementById('questionCounter');
-            const scoreDisplay = document.getElementById('scoreDisplay');
-            const questionText = document.getElementById('questionText');
-            const optionsList = document.getElementById('optionsList');
-            const submitBtn = document.getElementById('submitBtn');
-            const feedback = document.getElementById('feedback');
-            const completionScreen = document.getElementById('completionScreen');
-            const finalScoreText = document.getElementById('finalScoreText');
-            const finishBtn = document.getElementById('finishBtn');
+        backBtn.onclick = () => window.location.href = './subjects.html';
 
-            let questions = [];
-            let totalPoints = 0;
-            let current = 0;
-            let score = 0;
-            let answered = false;
+        /* ─── STATE ─── */
+        let questions = [], totalPoints = 0, current = 0, score = 0, answered = false;
 
-            const params = new URLSearchParams(window.location.search);
-            const subjectId = params.get('subject');
-            if (!subjectId) {
-                showToast('No subject specified', 'error');
+        /* ─── UTIL ─── */
+        function renderQuestion() {
+            const q = questions[current];
+            const total = questions.length;
+
+            answered = false;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submit';
+
+            /* Header */
+            questionCounter.textContent = `Question ${current + 1} of ${total}`;
+            scoreDisplay.textContent = `Score: ${score}`;
+            progressBar.style.width = `${current / total * 100}%`;
+
+            /* Body */
+            questionText.textContent = q.question;
+            optionsList.innerHTML = '';
+            feedback.textContent = '';
+
+            q.options.forEach((opt, i) => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-3 cursor-pointer p-3 border rounded transition '
+                    + 'hover:bg-neutral-800 hover:border-accent';
+                div.innerHTML = `<input type="radio" name="opt" id="opt${i}"
+                               value="${opt.text}" class="text-accent" />
+                       <label for="opt${i}" class="flex-1">${opt.text}</label>`;
+                /* enable submit once chosen */
+                div.addEventListener('click', () => {
+                    if (!answered) {
+                        div.querySelector('input').checked = true;
+                        submitBtn.disabled = false;
+                    }
+                });
+                optionsList.appendChild(div);
+            });
+        }
+
+        function showCompletion() {
+            document.getElementById('progressContainer').classList.add('hidden');
+            document.getElementById('questionCard').classList.add('hidden');
+            submitBtn.parentElement.classList.add('hidden');
+            finalScoreText.textContent = `You scored ${score} / ${totalPoints} points`;
+            completionScreen.classList.remove('hidden');
+        }
+
+        /* ─── SUBMIT BUTTON LOGIC (NO MORE EVENT OVERWRITES) ─── */
+        submitBtn.addEventListener('click', () => {
+            /* case 1: not answered yet -> grade */
+            if (!answered) {
+                const chosen = document.querySelector('input[name="opt"]:checked');
+                if (!chosen) { toast('Select an answer', 'error'); return; }
+
+                answered = true;
+                const ans = chosen.value;
+                const q = questions[current];
+                const pts = q.points || 1;
+                const isYes = ans === q.correctOption;
+
+                if (isYes) {
+                    score += pts;
+                    feedback.textContent = `Correct! +${pts} pts`;
+                    feedback.className = 'mt-6 text-green-400 font-semibold';
+                } else {
+                    feedback.textContent = `Incorrect. Answer: ${q.correctOption}`;
+                    feedback.className = 'mt-6 text-red-400 font-semibold';
+                    optionsList.classList.add('animate-shake');
+                    setTimeout(() => optionsList.classList.remove('animate-shake'), 400);
+                }
+
+                /* update score UI immediately */
+                scoreDisplay.textContent = `Score: ${score}`;
+                submitBtn.textContent = (current < questions.length - 1) ? 'Next' : 'Finish';
                 return;
             }
 
-            // load challenges
-            fetch(`http://127.0.0.1:8000/challenges/subject/${subjectId}`)
-                .then(r => r.json())
-                .then(data => {
-                    questions = data;
-                    totalPoints = questions.reduce((sum, q) => sum + (q.points || 1), 0);
-                    if (!Array.isArray(questions) || questions.length === 0) {
-                        showToast('No challenges found', 'error');
-                        questionText.innerHTML = 'No challenges available.';
-                        return;
-                    }
-                    renderQuestion();
-                })
-                .catch(() => showToast('Failed loading challenges', 'error'));
-
-            function renderQuestion() {
-                const q = questions[current];
-                const total = questions.length;
-                answered = false;
-                submitBtn.disabled = true;
-                feedback.textContent = '';
-                questionCounter.textContent = `Question ${current + 1} of ${total}`;
-                scoreDisplay.textContent = `Score: ${score} pts`;
-                progressBar.style.width = `${((current) / total) * 100}%`;
-                questionText.textContent = q.question;
-                optionsList.innerHTML = '';
-                q.options.forEach((o, i) => {
-                    const div = document.createElement('div');
-                    div.className = 'flex items-center space-x-3 cursor-pointer p-3 border rounded hover:bg-gray-800 hover:border-[#FF8C42]';
-                    div.innerHTML = `
-            <input type="radio" name="opt" id="opt${i}" value="${o.text}" class="text-[#FF8C42]" />
-            <label for="opt${i}" class="flex-1">${o.text}</label>
-          `;
-                    div.onclick = () => {
-                        if (answered) return;
-                        div.querySelector('input').checked = true;
-                        submitBtn.disabled = false;
-                    };
-                    optionsList.appendChild(div);
-                });
+            /* case 2: already answered -> move on */
+            if (current < questions.length - 1) {
+                current++;
+                renderQuestion();
+            } else {
+                showCompletion();
             }
-
-            submitBtn.addEventListener('click', () => {
-                if (answered) return;
-                const selected = document.querySelector('input[name="opt"]:checked');
-                if (!selected) return showToast('Select an answer', 'error');
-                answered = true;
-                const ans = selected.value;
-                const correct = questions[current].correctOption;
-                const pts = questions[current].points || 1;
-                if (ans === correct) {
-                    score += pts;
-                    feedback.textContent = `Correct! +${pts} pts`;
-                    feedback.className = 'mt-4 text-green-400 font-semibold';
-                } else {
-                    feedback.textContent = `Incorrect. Answer: ${correct}`;
-                    feedback.className = 'mt-4 text-red-400 font-semibold';
-                }
-                submitBtn.textContent = (current < questions.length - 1) ? 'Next' : 'Finish';
-                submitBtn.disabled = false;
-
-                if (current < questions.length - 1) {
-                    submitBtn.onclick = () => {
-                        current++;
-                        submitBtn.textContent = 'Submit';
-                        renderQuestion();
-                    };
-                } else {
-                    submitBtn.onclick = showCompletion;
-                }
-            });
-
-            function showCompletion() {
-                document.getElementById('progressContainer').classList.add('hidden');
-                document.getElementById('questionCard').classList.add('hidden');
-                submitBtn.parentElement.classList.add('hidden');
-                finalScoreText.textContent = `You scored ${score} of ${totalPoints} points`;
-                completionScreen.classList.remove('hidden');
-            }
-
-            finishBtn.addEventListener('click', async () => {
-                const session = JSON.parse(localStorage.getItem('mathbattle') || '{}');
-                if (!session.userId) {
-                    window.location.href = './index.html';
-                    return;
-                }
-                const studentId = session.userId;
-                try {
-                    await fetch('http://127.0.0.1:8000/progress/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${session.access_token}`
-                        },
-                        body: JSON.stringify({
-                            student_id: session.userId,       // <— you must include this
-                            subject_id: subjectId,
-                            points: score
-                        })
-                    });
-                    showToast('Progress recorded', 'success');
-                } catch (e) {
-                    showToast('Failed to record progress', 'error');
-                } finally {
-                    window.location.href = './subjects.html';
-                }
-            });
         });
+
+        /* ─── FINISH BTN ─── */
+        finishBtn.onclick = async () => {
+            const session = JSON.parse(localStorage.getItem('mathbattle') || '{}');
+            if (!session.userId) return (window.location.href = './index.html');
+
+            const subjectId = new URLSearchParams(location.search).get('subject');
+
+            try {
+                await fetch('http://127.0.0.1:8000/progress/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${session.access_token}`
+                    },
+                    body: JSON.stringify({ student_id: session.userId, subject_id: subjectId, points: score })
+                });
+                toast('Progress recorded', 'success');
+            } catch { toast('Failed to record progress', 'error'); }
+            finally { window.location.href = './subjects.html'; }
+        };
+
+        /* ─── FETCH CHALLENGES ─── */
+        (async () => {
+            const subjectId = new URLSearchParams(location.search).get('subject');
+            if (!subjectId) { toast('No subject specified', 'error'); return; }
+
+            try {
+                const res = await fetch(`http://127.0.0.1:8000/challenges/subject/${subjectId}`);
+                questions = await res.json();
+                if (!res.ok || !Array.isArray(questions) || !questions.length)
+                    throw new Error('No challenges found');
+
+                totalPoints = questions.reduce((s, q) => s + (q.points || 1), 0);
+                renderQuestion();
+            } catch (e) {
+                questionText.textContent = e.message;
+                toast(e.message, 'error');
+            }
+        })();
     </script>
 </body>
 

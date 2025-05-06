@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculation Sprint | MathBattle</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1A1B1F] via-[#111113] to-[#0A0A0D]">
+    <div id="toast-container" class="fixed top-4 right-4 space-y-2 z-50"></div>
+    <section class="min-h-[calc(100vh-100px)] w-full py-16 md:py-24">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold mb-3 text-white">Calculation Sprint</h1>
+                <p class="text-lg max-w-3xl mx-auto text-[#C0BFC2]">
+                    Test your math speed! Solve as many problems as you can within the time limit.
+                    The faster you are, the more points you earn!
+                </p>
+            </div>
+
+            <div class="bg-[#1F2937] max-w-2xl mx-auto rounded-2xl shadow-xl border-2 border-[#2D2E32]">
+                <div class="flex items-center justify-between p-6 border-b border-[#2D2E32]">
+                    <div class="flex items-center gap-2">
+                        <svg class="h-6 w-6 text-[#9D7BED]" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
+                        </svg>
+                        <h2 class="text-xl font-semibold text-white">Calculation Sprint</h2>
+                    </div>
+                </div>
+
+                <div id="game-content" class="p-6">
+                    <div class="text-center py-8">
+                        <svg class="h-16 w-16 mx-auto text-[#9D7BED] mb-4" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <h3 class="text-2xl font-semibold text-white">Ready to Sprint?</h3>
+                        <p class="mt-2 text-[#C0BFC2]">Solve as many calculations as you can in 30 seconds!</p>
+                        <button id="start-btn"
+                            class="mt-6 inline-flex items-center gap-2 bg-[#9D7BED] text-[#0A0A0D] px-8 py-3 rounded-lg text-lg font-semibold hover:bg-[#7951B2] transition">
+                            Start Sprint!</button>
+                    </div>
+                </div>
+
+                <div class="p-6 flex justify-between items-center border-t border-[#2D2E32]">
+                    <a href="../index.html">
+
+                        <button id="back-btn"
+                            class="border border-[#C0BFC2] text-[#C0BFC2] px-4 py-2 rounded-lg hover:bg-[#2D2E32] transition">Back
+                            to Games</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        let isActive = false;
+        let score = 0;
+        let timeLeft = 30;
+        let problem = { num1: 0, num2: 0, operator: "+", answer: "" };
+        let timer = null;
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `text-white px-4 py-2 rounded shadow fixed top-4 right-4 ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
+            toast.textContent = message;
+            document.getElementById('toast-container').appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function generateProblem() {
+            const operators = ['+', '-', '*'];
+            const operator = operators[Math.floor(Math.random() * operators.length)];
+            let num1, num2;
+            switch (operator) {
+                case '+':
+                    num1 = Math.floor(Math.random() * 50) + 1;
+                    num2 = Math.floor(Math.random() * 50) + 1;
+                    break;
+                case '-':
+                    num1 = Math.floor(Math.random() * 50) + 10;
+                    num2 = Math.floor(Math.random() * num1);
+                    break;
+                case '*':
+                    num1 = Math.floor(Math.random() * 12) + 1;
+                    num2 = Math.floor(Math.random() * 12) + 1;
+                    break;
+            }
+            return { num1, num2, operator, answer: "" };
+        }
+
+        function startGame() {
+            isActive = true;
+            score = 0;
+            timeLeft = 30;
+            problem = generateProblem();
+            updateGameUI();
+            showToast("Calculation Sprint Started! Solve as many problems as you can in 30 seconds!");
+            timer = setInterval(() => {
+                timeLeft--;
+                updateGameUI();
+                if (timeLeft <= 0) endGame();
+            }, 1000);
+        }
+
+        function endGame() {
+            isActive = false;
+            clearInterval(timer);
+            const content = document.getElementById('game-content');
+            content.innerHTML = `
+                <div class="text-center py-8">
+                    <h3 class="text-2xl font-semibold text-white mb-4">Time's Up!</h3>
+                    <p class="text-lg text-[#C0BFC2]">Your final score: <span class="font-bold text-[#9D7BED]">${score}</span> points</p>
+                    <button id="play-again-btn" class="mt-6 inline-flex items-center gap-2 bg-[#9D7BED] text-[#0A0A0D] px-8 py-3 rounded-lg text-lg font-semibold hover:bg-[#7951B2] transition">Play Again</button>
+                </div>
+            `;
+            document.getElementById('play-again-btn').addEventListener('click', startGame);
+        }
+
+        function checkAnswer() {
+            if (!isActive) return;
+            let correctAnswer;
+            switch (problem.operator) {
+                case '+': correctAnswer = problem.num1 + problem.num2; break;
+                case '-': correctAnswer = problem.num1 - problem.num2; break;
+                case '*': correctAnswer = problem.num1 * problem.num2; break;
+            }
+            if (parseInt(problem.answer) === correctAnswer) {
+                score++;
+                showToast("Correct! +1 point");
+            } else {
+                showToast(`Incorrect. The answer was ${correctAnswer}`, 'error');
+            }
+            problem = generateProblem();
+            updateGameUI();
+        }
+
+        function updateGameUI() {
+            const content = document.getElementById('game-content');
+            if (!isActive) return;
+            content.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center">
+                        <span class="text-lg px-4 py-2 bg-[#2D3748] rounded-full text-[#C0BFC2]">Score: ${score}</span>
+                        <span class="text-lg px-4 py-2 bg-[#2D3748] rounded-full text-[#C0BFC2]">Time: ${timeLeft}s</span>
+                    </div>
+                    <div class="bg-[#111827] p-6 rounded-xl shadow-md text-center">
+                        <h3 class="text-3xl font-bold mb-2 text-white">${problem.num1} ${problem.operator} ${problem.num2} = ?</h3>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <input id="answer-input" type="number"
+                            class="flex-1 p-4 text-xl text-center bg-[#111827] placeholder:text-[#5A5A5A] border-2 border-[#2D2E32] rounded-md focus:border-[#9D7BED] focus:ring focus:ring-[#9D7BED]/20 transition text-white"
+                            value="${problem.answer}" placeholder="Enter your answer">
+                        <button id="submit-btn" class="bg-[#9D7BED] hover:bg-[#7951B2] text-[#0A0A0D] h-full py-5 px-6 rounded-lg transition font-semibold">Submit</button>
+                    </div>
+                    <p class="text-sm text-center text-[#C0BFC2]">Press Enter to submit your answer quickly!</p>
+                </div>
+            `;
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.addEventListener('click', checkAnswer);
+            const input = document.getElementById('answer-input');
+            input.addEventListener('input', (e) => problem.answer = e.target.value);
+            input.addEventListener('keypress', (e) => { if (e.key === 'Enter') checkAnswer(); });
+            input.focus();
+        }
+
+        document.getElementById('start-btn').addEventListener('click', startGame);
+        document.getElementById('back-btn').addEventListener('click', () => {
+            window.location.href = '/games';
+        });
+    </script>
+</body>
+
+</html>

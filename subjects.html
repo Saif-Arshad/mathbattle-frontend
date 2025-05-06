@@ -2,128 +2,207 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subjects – Educational Math Battle Game</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Subjects | MathBattle</title>
+
+    <!-- Tailwind + Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap"
+        rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui'] },
+                extend: {
+                    colors: {
+                        brand: { DEFAULT: '#9D7BED', dark: '#7951B2' },
+                        accent: { DEFAULT: '#FF8C42', dark: '#D46E1F' },
+                        neutral: { 900: '#1A1B1F', 800: '#111113', 700: '#0A0A0D' },
+                    },
+                    dropShadow: { soft: '0 8px 24px rgba(157,123,237,.25)' }
+                }
+            }
+        };
+    </script>
+
+    <style>
+        /* ––––– BACKGROUND GRADIENT & STARFIELD ––––– */
+        body {
+            background: linear-gradient(135deg, #1A1B1F 0%, #111113 50%, #0A0A0D 100%);
+            min-height: 100vh;
+            font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+            color: #e5e5e5;
+        }
+
+        .starfield {
+            pointer-events: none;
+            position: fixed;
+            inset: 0;
+            background-image:
+                radial-gradient(2px 2px at 25% 40%, rgba(157, 123, 237, .8) 0, transparent 60%),
+                radial-gradient(1px 1px at 70% 70%, rgba(255, 140, 66, .8) 0, transparent 60%),
+                radial-gradient(1.5px 1.5px at 40% 80%, rgba(255, 255, 255, .6) 0, transparent 60%);
+            background-size: 400px 400px;
+            animation: drift 60s linear infinite;
+            opacity: .35;
+        }
+
+        @keyframes drift {
+            to {
+                background-position: -800px 800px;
+            }
+        }
+
+        /* ––––– CARD ––––– */
+        .subject-card {
+            background: rgba(45, 46, 50, .65);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, .07);
+            border-radius: 1rem;
+            transition: transform .25s ease, box-shadow .25s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-6px) rotateX(2deg) rotateY(-2deg);
+            box-shadow: 0 8px 24px rgba(157, 123, 237, .25);
+        }
+
+        /* shimmer placeholder */
+        @keyframes shimmer {
+            0% {
+                background-position: -468px 0
+            }
+
+            100% {
+                background-position: 468px 0
+            }
+        }
+
+        .skeleton {
+            animation-duration: 1.2s;
+            animation-fill-mode: forwards;
+            animation-iteration-count: infinite;
+            animation-timing-function: linear;
+            animation-name: shimmer;
+            background: #2c2c2c;
+            background: linear-gradient(to right, #2c2c2c 8%, #3a3a3a 38%, #2c2c2c 54%);
+            background-size: 1000px 100%;
+        }
+    </style>
 </head>
 
-<body class="bg-black max-w-[100vw] overflow-x-hidden text-gray-100">
+<body>
+    <div class="starfield"></div>
 
-    <!-- Navigation -->
-    <nav class="bg-gray-800">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="flex h-16 items-center justify-between">
-                <div class="flex items-center">
-                    <h1 class="text-white text-xl font-extrabold tracking-wider">
-                        ⚔️ BattleMath ⚔️
-                    </h1>
-                </div>
-                <a href="./index.html">
-
-                    <button id="backBtn" class="px-4 py-2 bg-[#9D7BED] hover:bg-[#7951B2] text-[#0A0A0D] rounded-lg">
-                        ← Back
-                    </button>
-                </a>
-            </div>
+    <!-- ─── NAVBAR ───────────────────────────────────────── -->
+    <nav class="bg-neutral-800/60 backdrop-blur-md shadow-lg">
+        <div class="max-w-7xl mx-auto h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8">
+            <h1 class="text-white text-xl font-extrabold tracking-wider">⚔️ MathBattle ⚔️</h1>
+            <a href="./index.html">
+                <button class="px-4 py-2 bg-brand hover:bg-brand-dark text-[#0A0A0D] rounded-lg font-semibold">
+                    ← Back
+                </button>
+            </a>
         </div>
     </nav>
 
-    <!-- Header -->
-    <div
-        class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div>
-            <h1 class="text-4xl font-bold text-white pt-8 mb-2">Math Challenges</h1>
-            <p class="text-lg text-gray-200">
-                Select a challenge to test your skills and earn points
-            </p>
-        </div>
-    </div>
+    <!-- ─── HEADER ───────────────────────────────────────── -->
+    <header class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <h2 class="text-4xl font-extrabold text-white mb-3">Math Subjects</h2>
+        <p class="text-lg text-gray-300">Pick a subject to enter the arena and earn points.</p>
+    </header>
 
-    <!-- Loading Spinner -->
-    <div id="loading" class="flex justify-center items-center py-20 hidden">
-        <svg class="animate-spin h-10 w-10 text-[#9D7BED]" xmlns="http://www.w3.org/2000/svg" fill="none"
+    <!-- ─── LOADING SPINNER ──────────────────────────────── -->
+    <div id="loading" class="flex justify-center items-center py-20">
+        <svg class="animate-spin h-10 w-10 text-brand" xmlns="http://www.w3.org/2000/svg" fill="none"
             viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
         </svg>
     </div>
 
-    <!-- Error Message -->
-    <div id="error-message" class="hidden text-center text-red-500 text-lg max-w-7xl mx-auto px-4"></div>
+    <!-- ─── ERROR ────────────────────────────────────────── -->
+    <div id="error-message" class="hidden text-center text-red-500 text-lg px-4"></div>
 
-    <!-- Subjects Grid -->
-    <div id="subjects-container" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 hidden">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Subjects will be dynamically inserted here -->
-        </div>
-    </div>
+    <!-- ─── SUBJECT GRID ─────────────────────────────────── -->
+    <section id="subjects-container" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 hidden">
+        <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+    </section>
 
+    <!-- ─── TOAST HELPER ─────────────────────────────────── -->
     <script>
-        function showToast(msg, type = 'success') {
+        function toast(msg, type = 'success') {
             const colors = { success: 'bg-green-600', error: 'bg-red-600' };
-            const toast = document.createElement('div');
-            toast.textContent = msg;
-            toast.className = `fixed top-5 right-5 text-white px-4 py-2 rounded shadow ${colors[type]} z-50`;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
+            const el = document.createElement('div');
+            el.textContent = msg;
+            el.className = `fixed top-5 right-5 px-4 py-2 text-white rounded shadow z-50 ${colors[type]}`;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 3000);
         }
+    </script>
 
+    <!-- ─── PAGE LOGIC ───────────────────────────────────── -->
+    <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            // Handle navigation based on localStorage
-            const stored = localStorage.getItem('mathbattle');
-
-            // Fetch subjects from API
             const apiBase = 'http://127.0.0.1:8000/subjects';
             const loading = document.getElementById('loading');
-            const errorMessage = document.getElementById('error-message');
-            const subjectsContainer = document.getElementById('subjects-container');
-            const subjectsGrid = subjectsContainer.querySelector('.grid');
+            const errorEl = document.getElementById('error-message');
+            const container = document.getElementById('subjects-container');
+            const grid = document.getElementById('grid');
+
+            /* skeleton placeholders while fetching */
+            const makeSkeleton = () => {
+                for (let i = 0; i < 6; i++) {
+                    const s = document.createElement('div');
+                    s.className = 'rounded-xl h-52 skeleton';
+                    grid.appendChild(s);
+                }
+            };
 
             try {
-                loading.classList.remove('hidden');
-                const response = await fetch(apiBase);
-                const data = await response.json();
+                makeSkeleton();
+                const res = await fetch(apiBase);
+                const data = await res.json();
 
-                if (!response.ok) {
-                    throw new Error(data.detail || 'Failed to load subjects');
-                }
+                if (!res.ok) throw new Error(data.detail || 'Failed to load subjects');
+                if (!Array.isArray(data)) throw new Error('Unexpected response');
 
-                if (!Array.isArray(data)) {
-                    throw new Error('Expected an array of subjects');
-                }
+                /* clear UI states */
+                loading.remove();
+                container.classList.remove('hidden');
+                grid.innerHTML = '';
 
-                // Clear loading and error states
-                loading.classList.add('hidden');
-                errorMessage.classList.add('hidden');
-                subjectsContainer.classList.remove('hidden');
-
-                // Render subjects as cards
+                /* build cards */
                 data.forEach(subject => {
                     const card = document.createElement('div');
-                    card.className = 'bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-700 hover:shadow-xl transition-shadow duration-300';
+                    card.className = 'subject-card p-6 drop-shadow-soft flex flex-col gap-4';
+
                     card.innerHTML = `
-                        <h3 class="text-xs  bg-[#9D7BED] mb-5 w-fit p-2 rounded-full px-4 capitalize text-white mb-2">${subject.category}</h3>
-                        <h3 class="text-xl font-semibold text-white mb-2">${subject.name}</h3>
-                        <p class="text-gray-400 mb-4">${subject.discription}</p>
-                        <a href="./challenges.html?subject=${subject._id}" 
-                            class="w-full px-4 py-3 bg-gradient-to-r from-[#9D7BED] to-[#7951B2] text-white rounded-lg 
-                            font-semibold tracking-wide shadow-lg hover:shadow-[#9D7BED]/50 
-                            transform hover:-translate-y-0.5 transition-all duration-200 
-                            active:scale-[0.98] flex items-center justify-center gap-2">
-                            Start Challenge
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                            </svg>
-                        </a>
-                    `;
-                    subjectsGrid.appendChild(card);
+            <span class="text-xs bg-brand px-3 py-1 rounded-full w-fit capitalize">${subject.category}</span>
+            <h3 class="text-2xl font-semibold text-white">${subject.name}</h3>
+            <p class="text-gray-300 flex-grow">${subject.discription}</p>
+            <a href="./challenges.html?subject=${subject._id}"
+               class="mt-auto inline-flex items-center justify-center gap-2 w-full py-3 rounded-lg
+                      bg-gradient-to-r from-brand to-brand-dark font-semibold text-[#0A0A0D]
+                      hover:drop-shadow-soft transition">
+              Start&nbsp;Challenge
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+              </svg>
+            </a>
+          `;
+                    grid.appendChild(card);
                 });
-            } catch (error) {
-                loading.classList.add('hidden');
-                errorMessage.classList.remove('hidden');
-                errorMessage.textContent = `Error: ${error.message}`;
-                showToast(error.message, 'error');
+
+            } catch (err) {
+                loading.remove();
+                grid.innerHTML = '';
+                errorEl.textContent = `Error: ${err.message}`;
+                errorEl.classList.remove('hidden');
+                toast(err.message, 'error');
             }
         });
     </script>
