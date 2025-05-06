@@ -319,12 +319,24 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const stored = localStorage.getItem('mathbattle');
+            if (stored) {
+                const data = JSON.parse(stored);
+                if (data.userType !== 'student') {
+                    window.location.href = './dashboard.html';
+                }
+            }
             const nav = document.getElementById('nav-links');
+            const session = JSON.parse(localStorage.getItem('mathbattle') || '{}');
+
             if (stored) {
                 nav.innerHTML = `
           <a href="./subjects.html"
              class="px-4 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition">
             Challenges
+          </a>
+          <a href="./progress.html?user=${session.userId}"
+             class="px-4 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition">
+            My Progress
           </a>
           <button id="logoutBtn"
              class="px-4 py-2 rounded-md text-sm font-medium text-[#9D7BED] hover:text-red-700 transition">

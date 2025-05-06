@@ -6,15 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Register | MathBattle</title>
 
-    <!-- Tailwind (stand-alone CDN build) -->
+    <!-- Tailwind (stand‑alone CDN build) -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui'] },
-                    colors: { primary: { DEFAULT: '#2563eb', 600: '#1d4ed8' } },
-                    dropShadow: { glow: '0 0 8px rgba(59, 130, 246, 0.45)' }
+                    colors: { primary: { DEFAULT: '#9D7BED', 600: '#7951B2' } },
+                    dropShadow: { glow: '0 0 8px rgba(157, 123, 237, 0.45)' }
                 }
             }
         };
@@ -45,7 +45,7 @@
         </div>
 
         <div class="w-full lg:w-1/2 p-8 sm:p-12 md:p-16 lg:p-20 glass">
-            <header class="mb-10 text-center">
+            <header class="mb-6 text-center">
                 <h1 class="text-3xl font-extrabold tracking-tight drop-shadow-glow">
                     Create your account
                 </h1>
@@ -54,8 +54,25 @@
                 </p>
             </header>
 
+            <!-- Role Tabs -->
+            <div class="mb-6 flex rounded-lg overflow-hidden border border-neutral-700">
+                <button type="button" data-role="student"
+                    class="flex-1 py-2 text-center bg-primary text-[#0A0A0D] font-medium" id="tab-student">
+                    Student
+                </button>
+                <button type="button" data-role="teacher"
+                    class="flex-1 py-2 text-center bg-neutral-800 text-gray-400 font-medium" id="tab-teacher">
+                    Teacher
+                </button>
+                <button type="button" data-role="parent"
+                    class="flex-1 py-2 text-center bg-neutral-800 text-gray-400 font-medium" id="tab-parent">
+                    Parent
+                </button>
+            </div>
+            <input type="hidden" name="role" id="role" value="student">
+
             <form id="registerForm" class="space-y-6">
-                <!-- Full Name Field -->
+                <!-- Full Name -->
                 <div>
                     <label for="fullName" class="block text-sm font-medium mb-1">Full Name</label>
                     <div class="relative">
@@ -67,7 +84,7 @@
                     </div>
                 </div>
 
-                <!-- Email Field -->
+                <!-- Email -->
                 <div>
                     <label for="email" class="block text-sm font-medium mb-1">Email</label>
                     <div class="relative">
@@ -79,7 +96,7 @@
                     </div>
                 </div>
 
-                <!-- Password Field -->
+                <!-- Password -->
                 <div>
                     <label for="password" class="block text-sm font-medium mb-1">Password</label>
                     <div class="relative">
@@ -91,11 +108,11 @@
                     </div>
                 </div>
 
-                <!-- Submit Button with Spinner -->
+                <!-- Submit -->
                 <button id="submitBtn" type="submit"
-                    class="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-[#9D7BED] hover:bg-primary-600 transition focus:outline-none focus:ring-2 focus:ring-primary/50 font-semibold">
+                    class="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-primary hover:bg-[#7951B2] transition focus:outline-none focus:ring-2 focus:ring-primary/50 font-semibold">
                     <span id="btnText">Sign Up</span>
-                    <svg id="btnSpinner" class="hidden animate-spin h-5 w-5 text-white"
+                    <svg id="btnSpinner" class="hidden animate-spin h-5 w-5 text-[#0A0A0D]"
                         xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
                         </circle>
@@ -119,18 +136,20 @@
     <script>
         feather.replace();
 
-        function showToast(message, type = 'error') {
-            const colors = {
-                success: 'bg-green-600',
-                error: 'bg-red-600'
-            };
-            const toast = document.createElement('div');
-            toast.textContent = message;
-            toast.className = `text-white px-4 py-2 rounded shadow ${colors[type]}`;
-            document.getElementById('toast-container').appendChild(toast);
-            setTimeout(() => toast.remove(), 4000);
-        }
+        // Role Tab Logic
+        document.querySelectorAll('[data-role]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-role]').forEach(b => {
+                    b.classList.replace('bg-primary', 'bg-neutral-800');
+                    b.classList.replace('text-[#0A0A0D]', 'text-gray-400');
+                });
+                btn.classList.replace('bg-neutral-800', 'bg-primary');
+                btn.classList.replace('text-gray-400', 'text-[#0A0A0D]');
+                document.getElementById('role').value = btn.getAttribute('data-role');
+            });
+        });
 
+        // Form Submit
         const form = document.getElementById('registerForm');
         const submitBtn = document.getElementById('submitBtn');
         const btnText = document.getElementById('btnText');
@@ -142,6 +161,7 @@
             const fullName = document.getElementById('fullName').value.trim();
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
 
             if (!fullName) return showToast('Full name is required.');
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -156,24 +176,14 @@
                 const res = await fetch('http://127.0.0.1:8000/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        full_name: fullName,
-                        email,
-                        password,
-                        role: 'student'
-                    })
+                    body: JSON.stringify({ full_name: fullName, email, password, role })
                 });
 
                 const data = await res.json();
-                if (!res.ok) {
-                    const msg = data.detail || 'Registration failed';
-                    return showToast(msg, 'error');
-                }
+                if (!res.ok) return showToast(data.detail || 'Registration failed', 'error');
 
                 showToast('Registration successful! Redirecting...', 'success');
-                setTimeout(() => {
-                    window.location.href = '/Frontend/login.html';
-                }, 1500);
+                setTimeout(() => window.location.href = '/Frontend/login.html', 1500);
             } catch (err) {
                 console.error(err);
                 showToast('Network error. Please try again.', 'error');
@@ -183,6 +193,15 @@
                 btnSpinner.classList.add('hidden');
             }
         });
+
+        function showToast(message, type = 'error') {
+            const colors = { success: 'bg-green-600', error: 'bg-red-600' };
+            const toast = document.createElement('div');
+            toast.textContent = message;
+            toast.className = `fixed top-5 right-5 text-white px-4 py-2 rounded shadow ${colors[type]} z-50`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
     </script>
 </body>
 

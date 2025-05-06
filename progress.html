@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Progress | MathBattle</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-gradient-to-br from-[#1A1B1F] via-[#111113] to-[#0A0A0D] min-h-screen text-gray-100">
+
+    <!-- Header -->
+    <header class="py-6 mb-8 border-b border-gray-800">
+        <div class="max-w-6xl mx-auto px-4 flex justify-between items-center">
+            <h1 class="text-3xl font-bold">My Progress</h1>
+            <button id="backBtn" class="px-4 py-2 bg-[#9D7BED] hover:bg-[#7951B2] text-[#0A0A0D] rounded-lg">
+                ← Back
+            </button>
+        </div>
+    </header>
+
+    <div id="toast-container" class="fixed top-5 right-5 space-y-2 z-50"></div>
+
+    <main class="max-w-6xl mx-auto px-4 pb-16 mb-10">
+
+        <!-- Total Points Card -->
+        <div class="bg-[#1F2937] rounded-2xl p-6 my-8 border border-[#2D2E32] shadow">
+            <h2 class="text-xl font-semibold mb-4">Total Points</h2>
+            <p class="text-3xl font-bold" id="totalPoints">0</p>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Line Chart -->
+            <div class="bg-[#1F2937] rounded-2xl p-6 border border-[#2D2E32] shadow">
+                <h2 class="text-xl font-semibold mb-4">Points This Week</h2>
+                <canvas id="weekChart" class="w-full h-64"></canvas>
+            </div>
+            <!-- Pie Chart -->
+            <div class="bg-[#1F2937] rounded-2xl p-6 border border-[#2D2E32] shadow">
+                <h2 class="text-xl font-semibold mb-4">Points by Subject</h2>
+                <canvas id="subjectPieChart" class="w-full h-64"></canvas>
+            </div>
+        </div>
+
+        <!-- Entries Grid -->
+        <div id="entriesContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"></div>
+
+    </main>
+
+    <script>
+        /*** Helpers ***/
+        function showToast(msg, type = 'error') {
+            const colors = { success: 'bg-green-600', error: 'bg-red-600' };
+            const d = document.createElement('div');
+            d.textContent = msg;
+            d.className = `text-white px-4 py-2 rounded shadow ${colors[type]} fixed top-5 right-5`;
+            document.body.appendChild(d);
+            setTimeout(() => d.remove(), 3000);
+        }
+
+        function getCurrentWeekRange() {
+            const now = new Date();
+            const dayOfWeek = now.getDay();
+            const diffToMonday = (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
+            const monday = new Date(now);
+            monday.setDate(now.getDate() - diffToMonday);
+            monday.setHours(0, 0, 0, 0);
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+            sunday.setHours(23, 59, 59, 999);
+            return { start: monday, end: sunday };
+        }
+
+        /*** Main ***/
+        document.addEventListener('DOMContentLoaded', async () => {
+            document.getElementById('backBtn').addEventListener('click', () => {
+                window.location.href = './dashboard.html';
+            });
+
+            const params = new URLSearchParams(location.search);
+            const userId = params.get('user');
+            if (!userId) {
+                showToast('No user specified', 'error');
+                return;
+            }
+
+            const headers = { 'Content-Type': 'application/json' };
+            const session = JSON.parse(localStorage.getItem('mathbattle') || '{}');
+            if (session.access_token) headers['Authorization'] = `Bearer ${session.access_token}`;
+
+            try {
+                const progRes = await fetch(`http://127.0.0.1:8000/progress/student/${userId}`, { headers });
+                const entries = await progRes.json();
+                if (!progRes.ok) throw new Error(entries.detail || 'Failed to load progress');
+
+                const subRes = await fetch('http://127.0.0.1:8000/subjects/');
+                const subs = await subRes.json();
+                if (!Array.isArray(subs)) throw new Error('Failed to load subjects');
+
+                const subjectMap = Object.fromEntries(subs.map(s => [s._id, s.name]));
+
+                entries.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+                // Current week range
+                const { start, end } = getCurrentWeekRange();
+                const currentWeekEntries = entries.filter(e => {
+                    const date = new Date(e.created_at);
+                    return date >= start && date <= end;
+                });
+
+                // Aggregate daily points for line chart
+                const dailyPoints = new Map();
+                currentWeekEntries.forEach(e => {
+                    const date = new Date(e.created_at).toLocaleDateString();
+                    if (!dailyPoints.has(date)) dailyPoints.set(date, 0);
+                    dailyPoints.set(date, dailyPoints.get(date) + e.points);
+                });
+
+                const weekDays = [];
+                const currentDate = new Date(start);
+                for (let i = 0; i < 7; i++) {
+                    weekDays.push(currentDate.toLocaleDateString());
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+
+                const chartLabels = weekDays.map(d => {
+                    const date = new Date(d);
+                    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric' });
+                });
+                const chartData = weekDays.map(d => dailyPoints.get(d) || 0);
+
+                // Line chart
+                const weekCtx = document.getElementById('weekChart').getContext('2d');
+                new Chart(weekCtx, {
+                    type: 'line',
+                    data: {
+                        labels: chartLabels,
+                        datasets: [{
+                            label: 'Points',
+                            data: chartData,
+                            fill: false,
+                            borderColor: '#9D7BED',
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: { ticks: { color: '#C0BFC2' }, grid: { color: '#222' } },
+                            y: { beginAtZero: true, ticks: { color: '#C0BFC2' }, grid: { color: '#222' } }
+                        },
+                        plugins: { legend: { labels: { color: '#C0BFC2' } } }
+                    }
+                });
+
+                // Aggregate subject points for pie chart
+                const subjectPoints = {};
+                entries.forEach(e => {
+                    if (!subjectPoints[e.subject_id]) subjectPoints[e.subject_id] = 0;
+                    subjectPoints[e.subject_id] += e.points;
+                });
+                const pieLabels = Object.keys(subjectPoints).map(id => subjectMap[id] || 'Unknown');
+                const pieData = Object.values(subjectPoints);
+
+                // Pie chart
+                const pieCtx = document.getElementById('subjectPieChart').getContext('2d');
+                new Chart(pieCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: pieLabels,
+                        datasets: [{
+                            data: pieData,
+                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#C9CBCF', '#7BE0AD', '#FF6F61', '#6B5B95']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'top', labels: { color: '#C0BFC2' } }
+                        }
+                    }
+                });
+
+                // Total points
+                const totalPoints = entries.reduce((sum, e) => sum + e.points, 0);
+                document.getElementById('totalPoints').textContent = totalPoints;
+
+                // Render entry cards
+                const container = document.getElementById('entriesContainer');
+                entries.forEach(e => {
+                    const date = new Date(e.created_at);
+                    const card = document.createElement('div');
+                    card.className = 'bg-[#1F2937] rounded-2xl p-6 border border-[#2D2E32] shadow hover:shadow-lg transition';
+                    card.innerHTML = `
+                        <h3 class="text-lg font-semibold text-white mb-2">${subjectMap[e.subject_id] || 'Unknown Subject'}</h3>
+                        <p class="text-[#C0BFC2] mb-4"><strong>Points:</strong> ${e.points}</p>
+                        <p class="text-sm text-gray-500">${date.toLocaleDateString()} ${date.toLocaleTimeString()}</p>
+                    `;
+                    container.appendChild(card);
+                });
+
+            } catch (err) {
+                console.error(err);
+                showToast(err.message, 'error');
+            }
+        });
+    </script>
+</body>
+
+</html>

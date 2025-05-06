@@ -2,140 +2,219 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard | MathBattle</title>
+
+    <!-- Tailwind + Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap"
+        rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
     <script>
         tailwind.config = {
             theme: {
+                fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui'] },
                 extend: {
-                    fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui'] },
-                    colors: { primary: { DEFAULT: '#2563eb', 600: '#1d4ed8' } },
-                    dropShadow: { glow: '0 0 8px rgba(59, 130, 246, 0.45)' }
+                    colors: {
+                        brand: { DEFAULT: '#9D7BED', dark: '#7951B2' },
+                        accent: { DEFAULT: '#FF8C42', dark: '#D46E1F' },
+                        neutral: { 900: '#1A1B1F', 800: '#111113', 700: '#0A0A0D' }
+                    },
+                    dropShadow: { soft: '0 8px 24px rgba(157,123,237,.25)' }
                 }
             }
         };
     </script>
+
     <style>
-        .glass {
-            background: rgba(17, 24, 39, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(14px);
+        /* ––––– GLOBAL BACKGROUND ––––– */
+        body {
+            background: linear-gradient(135deg, #1A1B1F 0%, #111113 50%, #0A0A0D 100%);
+            min-height: 100vh;
+            font-family: Inter, ui-sans-serif, system-ui, sans-serif;
         }
 
+        /* ––––– STARFIELD ––––– */
+        .starfield {
+            pointer-events: none;
+            position: fixed;
+            inset: 0;
+            background-image:
+                radial-gradient(2px 2px at 25% 40%, rgba(157, 123, 237, .8) 0, transparent 60%),
+                radial-gradient(1px 1px at 70% 70%, rgba(255, 140, 66, .8) 0, transparent 60%),
+                radial-gradient(1.5px 1.5px at 40% 80%, rgba(255, 255, 255, .6) 0, transparent 60%);
+            background-size: 400px 400px;
+            animation: drift 60s linear infinite;
+            opacity: .35;
+        }
+
+        @keyframes drift {
+            to {
+                background-position: -800px 800px;
+            }
+        }
+
+        /* ––––– GLASS CARD ––––– */
+        .glass {
+            perspective: 1000px;
+            /* 3‑D for flip */
+            background: rgba(45, 46, 50, .65);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-radius: 1rem;
+            transition: transform .25s ease, box-shadow .25s ease;
+        }
+
+        .glass:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(157, 123, 237, .25);
+        }
+
+        /* ––––– FLIP EFFECT ––––– */
+        .glass>.card-face {
+            transform-style: preserve-3d;
+            transition: transform .6s;
+        }
+
+        .glass:hover>.card-face {
+            transform: rotateY(180deg);
+        }
+
+        .card-side {
+            backface-visibility: hidden;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+        }
+
+        /* ––––– SINGLE‑CARD HERO ––––– */
+        .single-card .glass {
+            width: 100%;
+            max-width: 420px;
+            margin-inline: auto;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(-4px);
+            }
+
+            50% {
+                transform: translateY(4px);
+            }
+        }
+
+        /* ––––– ACCENT BORDERS BY ROLE ––––– */
         .admin-dashboard .glass {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-color: rgba(255, 140, 66, .25);
         }
 
         .teacher-dashboard .glass {
-            background: rgba(34, 197, 94, 0.1);
-            border: 1px solid rgba(34, 197, 94, 0.2);
+            border-color: rgba(157, 123, 237, .25);
         }
 
         .parent-dashboard .glass {
-            background: rgba(168, 85, 247, 0.1);
-            border: 1px solid rgba(168, 85, 247, 0.2);
-        }
-
-        .admin-dashboard #dashboardHeading {
-            color: #3b82f6;
-        }
-
-        .teacher-dashboard #dashboardHeading {
-            color: #22c55e;
-        }
-
-        .parent-dashboard #dashboardHeading {
-            color: #a855f7;
+            border-color: rgba(100, 181, 246, .25);
         }
     </style>
 </head>
 
-<body class="bg-black">
-    <header class="bg-gray-900 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
-            <span class="text-2xl font-bold text-white">MathBattle</span>
-            <button id="logoutBtn" class="bg-white text-gray-900 px-5 py-2 rounded-lg hover:bg-gray-200">
+<body class="text-white">
+
+    <!-- Starfield background -->
+    <div class="starfield"></div>
+
+    <!-- HEADER -->
+    <header class="bg-neutral-800/60 backdrop-blur-md shadow-lg">
+        <div class="max-w-7xl mx-auto flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
+            <span class="text-2xl font-black tracking-tight">MathBattle</span>
+            <button id="logoutBtn"
+                class="inline-flex items-center gap-2 bg-brand hover:bg-brand-dark px-5 py-2 rounded-lg font-semibold transition">
                 Logout
             </button>
         </div>
     </header>
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="mb-8">
-            <h1 id="dashboardHeading" class="text-3xl font-bold text-gray-100"></h1>
-            <p id="dashboardSubtext" class="text-gray-200 mt-2"></p>
+
+    <!-- MAIN -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="mb-10">
+            <h1 id="dashboardHeading" class="text-4xl font-extrabold tracking-tight"></h1>
+            <p id="dashboardSubtext" class="text-neutral-400 mt-2 text-lg"></p>
         </div>
-        <div id="cardsContainer" class="grid grid-cols-1 gap-6"></div>
+        <div id="cardsContainer" class="grid gap-6"></div>
     </main>
+
+    <!-- SCRIPT -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            /* Session check */
             const sessionRaw = localStorage.getItem('mathbattle');
-            if (!sessionRaw) {
-                return window.location.href = './login.html';
-            }
-            const session = JSON.parse(sessionRaw);
-            const role = session.userType;
-            const mainEl = document.querySelector('main');
-            mainEl.classList.add(`${role}-dashboard`);
+            if (!sessionRaw) return (window.location.href = './login.html');
+            const { userType: role } = JSON.parse(sessionRaw);
+
             const headingEl = document.getElementById('dashboardHeading');
             const subtextEl = document.getElementById('dashboardSubtext');
             const container = document.getElementById('cardsContainer');
 
-            if (role === 'student') {
-                return window.location.href = './index.html';
-            }
+            /* Redirect students away */
+            if (role === 'student') return (window.location.href = './index.html');
 
-            container.innerHTML = '';
+            /* Role accent class */
+            document.querySelector('main').classList.add(role + '-dashboard');
 
+            /* Base grid layout */
+            container.className = 'grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
+
+            /* Card factory (front + back faces) */
+            const card = (href, emoji, title, desc) => `
+        <a href="${href}" class="glass p-6 drop-shadow-soft relative block">
+          <div class="card-face">
+            <!-- Front -->
+            <div class="card-side absolute inset-0 flex flex-col gap-3">
+              <div class="text-3xl">${emoji}</div>
+              <h3 class="text-xl font-semibold">${title}</h3>
+              <p class="text-neutral-300 text-sm">${desc}</p>
+            </div>
+            <!-- Back -->
+            <div class="card-side card-back absolute inset-0 flex items-center justify-center">
+              <span class="text-brand font-semibold text-lg">Go →</span>
+            </div>
+          </div>
+        </a>`;
+
+            /* Role‑specific tiles */
             if (role === 'admin') {
                 headingEl.textContent = 'Admin Dashboard';
-                subtextEl.textContent = 'Manage your Math Battle application';
-                container.innerHTML = `
-                    <a href="./users.html" class="glass rounded-lg shadow h-full transition hover:shadow-lg p-6">
-                        <h3 class="text-lg font-semibold text-white mb-2">👥 Manage Users</h3>
-                        <p class="text-gray-200 text-sm">View and manage user accounts</p>
-                    </a>
-                    <a href="./subject.html" class="glass rounded-lg shadow h-full transition hover:shadow-lg p-6">
-                        <h3 class="text-lg font-semibold text-white mb-2">📚 Manage Subjects</h3>
-                        <p class="text-gray-200 text-sm">Add, edit, and remove subjects</p>
-                    </a>
-                    <a href="./admin-challenges.html" class="glass rounded-lg shadow h-full transition hover:shadow-lg p-6">
-                        <h3 class="text-lg font-semibold text-white mb-2">🧩 Manage Challenges</h3>
-                        <p class="text-gray-200 text-sm">Add, edit, and remove Challenges</p>
-                    </a>
-                `;
-                container.classList.add('md:grid-cols-3');
-            } else if (role === 'teacher') {
+                subtextEl.textContent = 'Manage your MathBattle application';
+        container.innerHTML = [
+            card('./users.html', '👥', 'Manage Users', 'User accounts'),
+            card('./subject.html', '📚', 'Manage Subjects', 'Add / edit / remove'),
+            card('./admin-challenges.html', '🧩', 'Manage Challenges', 'Add / edit / remove')
+        ].join('');
+            }
+            if (role === 'teacher') {
                 headingEl.textContent = 'Teacher Dashboard';
                 subtextEl.textContent = 'Manage your students and challenges';
-                container.innerHTML = `
-                    <a href="/teacher/students" class="glass rounded-lg shadow h-full transition hover:shadow-lg p-6">
-                        <h3 class="text-lg font-semibold text-white mb-2">🎓 Manage Students</h3>
-                        <p class="text-gray-200 text-sm">View and manage assigned students</p>
-                    </a>
-                    <a href="/teacher/challenges" class="glass rounded-lg shadow h-full transition hover:shadow-lg p-6">
-                        <h3 class="text-lg font-semibold text-white mb-2">📝 Create Challenges</h3>
-                        <p class="text-gray-200 text-sm">Design new challenges for your students</p>
-                    </a>
-                `;
-                container.classList.add('md:grid-cols-2');
-            } else if (role === 'parent') {
+                container.innerHTML = card('./childern.html', '🎓', 'Manage Students', 'Assigned students');
+            }
+            if (role === 'parent') {
                 headingEl.textContent = 'Parent Dashboard';
-                subtextEl.textContent = 'Monitor your children\'s progress';
-                container.innerHTML = `
-                    <a href="/parent/children" class="glass rounded-lg shadow h-full transition hover:shadow-lg p-6">
-                        <h3 class="text-lg font-semibold text-white mb-2">🧒 Manage Children</h3>
-                        <p class="text-gray-200 text-sm">View and track your children's progress</p>
-                    </a>
-                `;
-            } else {
-                headingEl.textContent = 'Dashboard';
-                subtextEl.textContent = 'Welcome to MathBattle';
+                subtextEl.textContent = 'Monitor your children’s progress';
+                container.innerHTML = card('./childern.html', '🧒', 'Manage Children', 'Track progress');
+                container.className = 'grid gap-6 grid-cols-1 sm:grid-cols-2';
+            }
+
+            /* Single‑card hero mode */
+            if (container.children.length === 1) {
+                document.body.classList.add('single-card');
             }
         });
 
+        /* Logout */
         document.getElementById('logoutBtn').addEventListener('click', () => {
             localStorage.removeItem('mathbattle');
             window.location.href = './login.html';
