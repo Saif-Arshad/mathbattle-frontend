@@ -67,7 +67,7 @@
             <h1 id="dashboardHeading" class="text-3xl font-bold text-gray-100"></h1>
             <p id="dashboardSubtext" class="text-gray-200 mt-2"></p>
         </div>
-        <div id="cardsContainer" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+        <div id="cardsContainer" class="grid grid-cols-1 gap-6"></div>
     </main>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -93,37 +93,43 @@
                 headingEl.textContent = 'Admin Dashboard';
                 subtextEl.textContent = 'Manage your Math Battle application';
                 container.innerHTML = `
-          <a href="./users.html" class="glass rounded-lg shadow h-full transition hover:shadow-lg p-6">
-            <h3 class="text-lg font-semibold text-white mb-2">Manage Users</h3>
-            <p class="text-gray-200 text-sm">View and manage user accounts</p>
-          </a>
-          <a href="/admin/subjects" class="glass rounded-lg shadow h-full transition hover:shadow-lg p-6">
-            <h3 class="text-lg font-semibold text-white mb-2">Manage Subjects</h3>
-            <p class="text-gray-200 text-sm">Add, edit, and remove subjects</p>
-          </a>
-        `;
+                    <a href="./users.html" class="glass rounded-lg shadow h-full transition hover:shadow-lg p-6">
+                        <h3 class="text-lg font-semibold text-white mb-2">👥 Manage Users</h3>
+                        <p class="text-gray-200 text-sm">View and manage user accounts</p>
+                    </a>
+                    <a href="./subject.html" class="glass rounded-lg shadow h-full transition hover:shadow-lg p-6">
+                        <h3 class="text-lg font-semibold text-white mb-2">📚 Manage Subjects</h3>
+                        <p class="text-gray-200 text-sm">Add, edit, and remove subjects</p>
+                    </a>
+                    <a href="./admin-challenges.html" class="glass rounded-lg shadow h-full transition hover:shadow-lg p-6">
+                        <h3 class="text-lg font-semibold text-white mb-2">🧩 Manage Challenges</h3>
+                        <p class="text-gray-200 text-sm">Add, edit, and remove Challenges</p>
+                    </a>
+                `;
+                container.classList.add('md:grid-cols-3');
             } else if (role === 'teacher') {
                 headingEl.textContent = 'Teacher Dashboard';
                 subtextEl.textContent = 'Manage your students and challenges';
                 container.innerHTML = `
-          <a href="/teacher/students" class="glass rounded-lg shadow h-full transition hover:shadow-lg p-6">
-            <h3 class="text-lg font-semibold text-white mb-2">Manage Students</h3>
-            <p class="text-gray-200 text-sm">View and manage assigned students</p>
-          </a>
-          <a href="/teacher/challenges" class="glass rounded-lg shadow h-full transition hover:shadow-lg p-6">
-            <h3 class="text-lg font-semibold text-white mb-2">Create Challenges</h3>
-            <p class="text-gray-200 text-sm">Design new challenges for your students</p>
-          </a>
-        `;
+                    <a href="/teacher/students" class="glass rounded-lg shadow h-full transition hover:shadow-lg p-6">
+                        <h3 class="text-lg font-semibold text-white mb-2">🎓 Manage Students</h3>
+                        <p class="text-gray-200 text-sm">View and manage assigned students</p>
+                    </a>
+                    <a href="/teacher/challenges" class="glass rounded-lg shadow h-full transition hover:shadow-lg p-6">
+                        <h3 class="text-lg font-semibold text-white mb-2">📝 Create Challenges</h3>
+                        <p class="text-gray-200 text-sm">Design new challenges for your students</p>
+                    </a>
+                `;
+                container.classList.add('md:grid-cols-2');
             } else if (role === 'parent') {
                 headingEl.textContent = 'Parent Dashboard';
                 subtextEl.textContent = 'Monitor your children\'s progress';
                 container.innerHTML = `
-          <a href="/parent/children" class="glass rounded-lg shadow h-full transition hover:shadow-lg p-6">
-            <h3 class="text-lg font-semibold text-white mb-2">Manage Children</h3>
-            <p class="text-gray-200 text-sm">View and track your children's progress</p>
-          </a>
-        `;
+                    <a href="/parent/children" class="glass rounded-lg shadow h-full transition hover:shadow-lg p-6">
+                        <h3 class="text-lg font-semibold text-white mb-2">🧒 Manage Children</h3>
+                        <p class="text-gray-200 text-sm">View and track your children's progress</p>
+                    </a>
+                `;
             } else {
                 headingEl.textContent = 'Dashboard';
                 subtextEl.textContent = 'Welcome to MathBattle';

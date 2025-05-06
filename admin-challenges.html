@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage Challenges | MathBattle</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+</head>
+
+<body class="bg-gradient-to-br from-[#1A1B1F] via-[#111113] to-[#0A0A0D] min-h-screen text-gray-100">
+
+    <header class="py-6">
+        <div class="max-w-6xl mx-auto px-4 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-white">Manage Challenges</h1>
+                <p class="text-gray-400 mt-1">Create, view, update, or delete challenges per subject.</p>
+            </div>
+            <button id="createBtn"
+                class="px-4 py-2 bg-[#9D7BED] hover:bg-[#7951B2] text-[#0A0A0D] font-semibold rounded-lg">
+                Create Challenge
+            </button>
+        </div>
+    </header>
+
+    <div id="toast-container" class="fixed top-5 right-5 space-y-2 z-50"></div>
+
+    <main class="max-w-6xl mx-auto px-4 pb-8">
+        <div class="mb-4">
+            <label for="subjectFilter" class="block text-sm font-medium text-gray-300">Select Subject</label>
+            <select id="subjectFilter"
+                class="mt-1 bg-[#2D3748] border border-gray-600 rounded py-2 px-3 text-gray-100"></select>
+        </div>
+        <div id="challengesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </main>
+
+    <div id="challengeModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden">
+        <div class="bg-[#1F2937] rounded-2xl p-6 w-full max-w-lg">
+            <h2 id="modalTitle" class="text-xl font-bold text-white mb-4"></h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300">Subject</label>
+                    <select id="modalSubject"
+                        class="mt-1 w-full bg-[#2D3748] border border-gray-600 rounded py-2 px-3 text-gray-100"></select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300">Question</label>
+                    <input id="modalQuestion" type="text"
+                        class="mt-1 w-full bg-[#2D3748] border border-gray-600 rounded py-2 px-3 text-gray-100" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Options</label>
+                    <div id="optionsContainer" class="space-y-2">
+                        <div class="flex items-center space-x-2">
+                            <input type="radio" name="correctOption" class="correctRadio text-[#9D7BED]" value="0" />
+                            <input
+                                class="optionInput flex-1 bg-[#2D3748] border border-gray-600 rounded py-2 px-3 text-gray-100"
+                                placeholder="Option 1" />
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <input type="radio" name="correctOption" class="correctRadio text-[#9D7BED]" value="1" />
+                            <input
+                                class="optionInput flex-1 bg-[#2D3748] border border-gray-600 rounded py-2 px-3 text-gray-100"
+                                placeholder="Option 2" />
+                        </div>
+                    </div>
+                    <button id="addOptionBtn" class="mt-2 text-sm text-blue-400 hover:underline">+ Add option</button>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end gap-3">
+                <button id="modalCancel"
+                    class="px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded">Cancel</button>
+                <button id="modalSave"
+                    class="flex items-center px-4 py-2 bg-[#9D7BED] hover:bg-[#7951B2] text-[#0A0A0D] font-semibold rounded">
+                    <svg id="modalSpinner" class="animate-spin h-5 w-5 mr-2 text-[#0A0A0D] hidden"
+                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                    </svg>
+                    <span id="modalSaveText">Save</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden">
+        <div class="bg-[#1F2937] rounded-2xl p-6 w-full max-w-md">
+            <h2 id="detailTitle" class="text-xl font-bold text-white mb-4"></h2>
+            <div id="detailContent" class="text-gray-100 space-y-2"></div>
+            <div class="mt-6 flex justify-end">
+                <button id="detailClose"
+                    class="px-4 py-2 bg-[#FF8C42] hover:bg-[#E67635] text-[#0A0A0D] rounded">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            function showToast(msg, type = 'error') {
+                const cols = { success: 'bg-green-600', error: 'bg-red-600' };
+                const d = document.createElement('div');
+                d.textContent = msg;
+                d.className = `text-white px-4 py-2 rounded shadow ${cols[type]}`;
+                document.getElementById('toast-container').appendChild(d);
+                setTimeout(() => d.remove(), 3000);
+            }
+
+            const apiSubjects = 'http://127.0.0.1:8000/subjects';
+            const apiChall = 'http://127.0.0.1:8000/challenges';
+            let subjects = [], challenges = [], editId = null;
+
+            const subjFilter = document.getElementById('subjectFilter');
+            const cont = document.getElementById('challengesContainer');
+            const createBtn = document.getElementById('createBtn');
+            const modal = document.getElementById('challengeModal');
+            const detModal = document.getElementById('detailModal');
+            const titleEl = document.getElementById('modalTitle');
+            const subjSel = document.getElementById('modalSubject');
+            const qIn = document.getElementById('modalQuestion');
+            const optsContainer = document.getElementById('optionsContainer');
+            const addOptBtn = document.getElementById('addOptionBtn');
+            const saveBtn = document.getElementById('modalSave');
+            const saveTxt = document.getElementById('modalSaveText');
+            const spin = document.getElementById('modalSpinner');
+            const cancel = document.getElementById('modalCancel');
+            const detailTitle = document.getElementById('detailTitle');
+            const detailContent = document.getElementById('detailContent');
+            const detailClose = document.getElementById('detailClose');
+
+            createBtn.onclick = () => {
+                editId = null;
+                titleEl.textContent = 'Create Challenge';
+                subjSel.value = subjFilter.value;
+                qIn.value = '';
+                optsContainer.innerHTML = '';
+                for (let i = 0; i < 2; i++) {
+                    const row = document.createElement('div');
+                    row.className = 'flex items-center space-x-2';
+                    row.innerHTML = `
+            <input type="radio" name="correctOption" class="correctRadio text-[#9D7BED]" value="${i}" />
+            <input class="optionInput flex-1 bg-[#2D3748] border border-gray-600 rounded py-2 px-3 text-gray-100" placeholder="Option ${i + 1}" />
+          `;
+                    optsContainer.appendChild(row);
+                }
+                saveTxt.textContent = 'Save';
+                spin.classList.add('hidden');
+                saveBtn.disabled = false;
+                modal.classList.remove('hidden');
+            };
+
+            cancel.onclick = () => modal.classList.add('hidden');
+            detailClose.onclick = () => detModal.classList.add('hidden');
+
+            addOptBtn.onclick = () => {
+                const index = optsContainer.children.length;
+                const row = document.createElement('div');
+                row.className = 'flex items-center space-x-2';
+                row.innerHTML = `
+          <input type="radio" name="correctOption" class="correctRadio text-[#9D7BED]" value="${index}" />
+          <input class="optionInput flex-1 bg-[#2D3748] border border-gray-600 rounded py-2 px-3 text-gray-100" placeholder="Option ${index + 1}" />
+        `;
+                optsContainer.appendChild(row);
+            };
+
+            async function loadSubjects() {
+                try {
+                    const res = await fetch(apiSubjects);
+                    subjects = await res.json();
+                    subjFilter.innerHTML = subjects.map(s => `<option value="${s._id}">${s.name}</option>`).join('');
+                    subjSel.innerHTML = subjFilter.innerHTML;
+                    await loadChallenges();
+                } catch {
+                    showToast('Failed to load subjects', 'error');
+                }
+            }
+
+            async function loadChallenges() {
+                try {
+                    const sid = subjFilter.value;
+                    const res = await fetch(`${apiChall}/subject/${sid}`);
+                    challenges = await res.json();
+                    render();
+                } catch {
+                    showToast('Failed to load challenges', 'error');
+                }
+            }
+
+            subjFilter.onchange = loadChallenges;
+
+            function render() {
+                cont.innerHTML = '';
+                challenges.forEach(ch => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-[#1F2937] rounded-2xl p-6 border border-[#2D2E32] flex flex-col justify-between';
+                    card.innerHTML = `
+            <div class="flex justify-end mb-4 space-x-2">
+              <button data-id="${ch._id}" class="detailBtn p-2 bg-blue-600 hover:bg-blue-700 rounded-full text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                  <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                </svg>
+              </button>
+              <button data-id="${ch._id}" class="editBtn p-2 bg-[#9D7BED] hover:bg-[#7951B2] text-[#0A0A0D] rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-8.829 8.829-3.535.707.707-3.535 8.829-8.829z" />
+                </svg>
+              </button>
+              <button data-id="${ch._id}" class="delBtn p-2 bg-red-600 hover:bg-red-700 rounded-full text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </div>
+            <div>
+              <p class="text-lg text-white mb-2">${ch.question}</p>
+              <ul class="list-disc list-inside text-[#C0BFC2] mb-2">
+                ${ch.options.map(o => `<li>${o.text}</li>`).join('')}  
+              </ul>
+              <p class="mt-2 text-sm text-green-400">Correct: ${ch.correctOption}</p>
+            </div>
+          `;
+                    cont.appendChild(card);
+                });
+                attachHandlers();
+            }
+
+            function attachHandlers() {
+                document.querySelectorAll('.detailBtn').forEach(b => {
+                    b.onclick = () => {
+                        const ch = challenges.find(x => x._id === b.dataset.id);
+                        detailTitle.textContent = 'Challenge Details';
+                        detailContent.innerHTML = `
+              <p><strong>Question:</strong> ${ch.question}</p>
+              <p><strong>Options:</strong></p>
+              <ul class="list-disc list-inside ml-4">
+                ${ch.options.map(o => `<li>${o.text}</li>`).join('')}
+              </ul>
+              <p class="mt-2"><strong>Correct:</strong> ${ch.correctOption}</p>
+            `;
+                        detModal.classList.remove('hidden');
+                    };
+                });
+                document.querySelectorAll('.editBtn').forEach(b => {
+                    b.onclick = () => {
+                        const ch = challenges.find(x => x._id === b.dataset.id);
+                        editId = ch._id;
+                        titleEl.textContent = 'Update Challenge';
+                        subjSel.value = ch.subject_id;
+                        qIn.value = ch.question;
+                        optsContainer.innerHTML = '';
+                        ch.options.forEach((o, i) => {
+                            const row = document.createElement('div');
+                            row.className = 'flex items-center space-x-2';
+                            row.innerHTML = `
+                <input type="radio" name="correctOption" class="correctRadio text-[#9D7BED]" value="${i}" ${o.text === ch.correctOption ? 'checked' : ''} />
+                <input class="optionInput flex-1 bg-[#2D3748] border border-gray-600 rounded py-2 px-3 text-gray-100" value="${o.text}" />
+              `;
+                            optsContainer.appendChild(row);
+                        });
+                        saveTxt.textContent = 'Update';
+                        spin.classList.add('hidden');
+                        saveBtn.disabled = false;
+                        modal.classList.remove('hidden');
+                    };
+                });
+                document.querySelectorAll('.delBtn').forEach(b => {
+                    b.onclick = async () => {
+                        if (!confirm('Delete challenge?')) return;
+                        await fetch(`${apiChall}/${b.dataset.id}`, { method: 'DELETE' });
+                        await loadChallenges();
+                        showToast('Deleted', 'success');
+                    };
+                });
+            }
+
+            saveBtn.onclick = async () => {
+                const question = qIn.value.trim();
+                if (!question) return showToast('Question is required', 'error');
+                const optionEls = Array.from(optsContainer.querySelectorAll('.optionInput'));
+                const radios = Array.from(optsContainer.querySelectorAll('.correctRadio'));
+                const optionTexts = optionEls.map(el => el.value.trim()).filter(t => t);
+                const selected = radios.find(r => r.checked);
+                if (optionTexts.length < 2) return showToast('At least two options required', 'error');
+                if (!selected) return showToast('Select correct option', 'error');
+                saveBtn.disabled = true; spin.classList.remove('hidden');
+                const payload = {
+                    subject_id: subjSel.value,
+                    question,
+                    correctOption: optionEls[radios.indexOf(selected)].value.trim(),
+                    options: optionTexts.map(t => ({ text: t }))
+                };
+                try {
+                    const url = editId ? `${apiChall}/${editId}` : apiChall;
+                    const method = editId ? 'PUT' : 'POST';
+                    await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    await loadChallenges();
+                    modal.classList.add('hidden');
+                    showToast(editId ? 'Updated' : 'Created', 'success');
+                } catch {
+                    showToast('Save failed', 'error');
+                } finally {
+                    spin.classList.add('hidden'); saveBtn.disabled = false;
+                }
+            };
+
+            loadSubjects();
+        });
+    </script>
+</body>
+
+</html>

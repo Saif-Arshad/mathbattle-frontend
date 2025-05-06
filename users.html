@@ -9,21 +9,13 @@
 </head>
 
 <body class="bg-gradient-to-br from-[#1A1B1F] via-[#111113] to-[#0A0A0D] min-h-screen text-gray-100">
-    <!-- Header -->
-    <header class="bg-transparent py-6">
-        <div class="max-w-6xl mx-auto px-4 flex justify-between items-center">
-            <h1 class="text-3xl font-bold text-white">Manage Users</h1>
-            <button id="logoutBtn" class="px-4 py-2 bg-[#FF8C42] hover:bg-[#E67635] rounded-lg font-semibold">
-                Logout
-            </button>
-        </div>
-    </header>
 
     <!-- Toast container -->
     <div id="toast-container" class="fixed top-5 right-5 space-y-2 z-50"></div>
 
     <!-- Main content -->
     <main class="max-w-6xl mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-white">Manage Users</h1>
         <p class="mb-6 text-gray-400">Here you can assign teachers or parents to student accounts, or delete users.</p>
 
         <!-- Loading spinner -->
@@ -88,26 +80,52 @@
             setTimeout(() => d.remove(), 3000);
         }
 
-        document.getElementById('logoutBtn').onclick = () => {
-            localStorage.removeItem('mathbattle');
-            location = './login.html';
-        };
-
         document.addEventListener('DOMContentLoaded', async () => {
+            console.log('DOMContentLoaded fired');
             const raw = localStorage.getItem('mathbattle');
-            if (!raw) return (location = './login.html');
-            const session = JSON.parse(raw);
+            console.log('localStorage mathbattle:', raw);
+            if (!raw) {
+                console.log('No session found, redirecting to login');
+                showToast('Please log in', 'error');
+                setTimeout(() => (location = './login.html'), 2000);
+                return;
+            }
+
+            let session;
+            try {
+                session = JSON.parse(raw);
+                console.log('Parsed session:', session);
+            } catch (e) {
+                console.error('Invalid session data:', e);
+                showToast('Invalid session data', 'error');
+                localStorage.removeItem('mathbattle');
+                setTimeout(() => (location = './login.html'), 2000);
+                return;
+            }
+
             if (session.userType !== 'admin') {
+                console.log('User is not admin, redirecting to dashboard');
                 showToast('Access denied', 'error');
-                return (location = './dashboard.html');
+                setTimeout(() => (location = './dashboard.html'), 2000);
+                return;
             }
 
             try {
-                const res = await fetch('http://127.0.0.1:8000/admin/all-users', {
-                    headers: { 'Authorization': `Bearer ${session.access_token}` }
-                });
-                if (!res.ok) throw new Error((await res.json()).detail || 'Failed to load');
-                const users = await res.json();
+                console.log('Attempting to fetch users');
+                const res = await fetch('http://127.0.0.1:8000/admin/all-users');
+                console.log('Fetch response status:', res.status);
+                const data = await res.json();
+                console.log('Response data:', data);
+
+                if (!res.ok) {
+                    throw new Error(data.detail || 'Failed to load users');
+                }
+
+                const users = data;
+                if (!Array.isArray(users)) {
+                    throw new Error('Expected an array of users');
+                }
+
                 const teachers = users.filter(u => u.role === 'teacher');
                 const parents = users.filter(u => u.role === 'parent');
                 const tbody = document.getElementById('usersTableBody');
@@ -143,6 +161,8 @@
                         <td class="px-6 py-4 flex">${actions}</td>
                     `;
                     tbody.appendChild(tr);
+
+
                 });
 
                 document.getElementById('loading').classList.add('hidden');
@@ -154,8 +174,7 @@
                         if (!confirm('Delete?')) return;
                         try {
                             await fetch(`http://127.0.0.1:8000/admin/${b.dataset.id}`, {
-                                method: 'DELETE',
-                                headers: { 'Authorization': `Bearer ${session.access_token}` }
+                                method: 'DELETE'
                             });
                             b.closest('tr').remove();
                             showToast('Deleted');
@@ -244,8 +263,7 @@
                     spi.classList.remove('hidden');
                     try {
                         await fetch(`http://127.0.0.1:8000/admin/${String(curId)}/${curType}?${curType}_id=${ms.value}`, {
-                            method: 'POST',
-                            headers: { 'Authorization': `Bearer ${session.access_token}` }
+                            method: 'POST'
                         });
                         showToast('Assigned');
                         modal.classList.add('hidden');
@@ -257,6 +275,7 @@
                     }
                 };
             } catch (e) {
+                console.error('Error:', e);
                 showToast(e.message, 'error');
             }
         });
