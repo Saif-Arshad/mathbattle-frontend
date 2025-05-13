@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Subjects | MathBattle</title>
 
-    <!-- Tailwind + Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap"
         rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
@@ -27,7 +26,6 @@
     </script>
 
     <style>
-        /* ––––– BACKGROUND GRADIENT & STARFIELD ––––– */
         body {
             background: linear-gradient(135deg, #1A1B1F 0%, #111113 50%, #0A0A0D 100%);
             min-height: 100vh;
@@ -54,7 +52,6 @@
             }
         }
 
-        /* ––––– CARD ––––– */
         .subject-card {
             background: rgba(45, 46, 50, .65);
             backdrop-filter: blur(14px);
@@ -70,7 +67,6 @@
             box-shadow: 0 8px 24px rgba(157, 123, 237, .25);
         }
 
-        /* shimmer placeholder */
         @keyframes shimmer {
             0% {
                 background-position: -468px 0
@@ -97,7 +93,6 @@
 <body>
     <div class="starfield"></div>
 
-    <!-- ─── NAVBAR ───────────────────────────────────────── -->
     <nav class="bg-neutral-800/60 backdrop-blur-md shadow-lg">
         <div class="max-w-7xl mx-auto h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8">
             <h1 class="text-white text-xl font-extrabold tracking-wider">⚔️ MathBattle ⚔️</h1>
@@ -109,13 +104,11 @@
         </div>
     </nav>
 
-    <!-- ─── HEADER ───────────────────────────────────────── -->
     <header class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <h2 class="text-4xl font-extrabold text-white mb-3">Math Subjects</h2>
         <p class="text-lg text-gray-300">Pick a subject to enter the arena and earn points.</p>
     </header>
 
-    <!-- ─── LOADING SPINNER ──────────────────────────────── -->
     <div id="loading" class="flex justify-center items-center py-20">
         <svg class="animate-spin h-10 w-10 text-brand" xmlns="http://www.w3.org/2000/svg" fill="none"
             viewBox="0 0 24 24">
@@ -124,15 +117,11 @@
         </svg>
     </div>
 
-    <!-- ─── ERROR ────────────────────────────────────────── -->
     <div id="error-message" class="hidden text-center text-red-500 text-lg px-4"></div>
 
-    <!-- ─── SUBJECT GRID ─────────────────────────────────── -->
     <section id="subjects-container" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 hidden">
         <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
     </section>
-
-    <!-- ─── TOAST HELPER ─────────────────────────────────── -->
     <script>
         function toast(msg, type = 'success') {
             const colors = { success: 'bg-green-600', error: 'bg-red-600' };
@@ -144,7 +133,6 @@
         }
     </script>
 
-    <!-- ─── PAGE LOGIC ───────────────────────────────────── -->
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const apiBase = 'http://127.0.0.1:8000/subjects';
@@ -153,7 +141,6 @@
             const container = document.getElementById('subjects-container');
             const grid = document.getElementById('grid');
 
-            /* skeleton placeholders while fetching */
             const makeSkeleton = () => {
                 for (let i = 0; i < 6; i++) {
                     const s = document.createElement('div');
@@ -170,12 +157,10 @@
                 if (!res.ok) throw new Error(data.detail || 'Failed to load subjects');
                 if (!Array.isArray(data)) throw new Error('Unexpected response');
 
-                /* clear UI states */
                 loading.remove();
                 container.classList.remove('hidden');
                 grid.innerHTML = '';
 
-                /* build cards */
                 data.forEach(subject => {
                     const card = document.createElement('div');
                     card.className = 'subject-card p-6 drop-shadow-soft flex flex-col gap-4';

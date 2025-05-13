@@ -11,7 +11,6 @@
 
 <body class="bg-gradient-to-br from-[#1A1B1F] via-[#111113] to-[#0A0A0D] min-h-screen text-gray-100">
 
-    <!-- Header -->
     <header class="py-6 mb-8 border-b border-gray-800">
         <div class="max-w-6xl mx-auto px-4 flex justify-between items-center">
             <h1 class="text-3xl font-bold">My Progress</h1>
@@ -25,33 +24,27 @@
 
     <main class="max-w-6xl mx-auto px-4 pb-16 mb-10">
 
-        <!-- Total Points Card -->
         <div class="bg-[#1F2937] rounded-2xl p-6 my-8 border border-[#2D2E32] shadow">
             <h2 class="text-xl font-semibold mb-4">Total Points</h2>
             <p class="text-3xl font-bold" id="totalPoints">0</p>
         </div>
 
-        <!-- Charts Section -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Line Chart -->
             <div class="bg-[#1F2937] rounded-2xl p-6 border border-[#2D2E32] shadow">
                 <h2 class="text-xl font-semibold mb-4">Points This Week</h2>
                 <canvas id="weekChart" class="w-full h-64"></canvas>
             </div>
-            <!-- Pie Chart -->
             <div class="bg-[#1F2937] rounded-2xl p-6 border border-[#2D2E32] shadow">
                 <h2 class="text-xl font-semibold mb-4">Points by Subject</h2>
                 <canvas id="subjectPieChart" class="w-full h-64"></canvas>
             </div>
         </div>
 
-        <!-- Entries Grid -->
         <div id="entriesContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"></div>
 
     </main>
 
     <script>
-        /*** Helpers ***/
         function showToast(msg, type = 'error') {
             const colors = { success: 'bg-green-600', error: 'bg-red-600' };
             const d = document.createElement('div');
@@ -74,7 +67,6 @@
             return { start: monday, end: sunday };
         }
 
-        /*** Main ***/
         document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('backBtn').addEventListener('click', () => {
                 window.location.href = './dashboard.html';
@@ -104,14 +96,12 @@
 
                 entries.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 
-                // Current week range
                 const { start, end } = getCurrentWeekRange();
                 const currentWeekEntries = entries.filter(e => {
                     const date = new Date(e.created_at);
                     return date >= start && date <= end;
                 });
 
-                // Aggregate daily points for line chart
                 const dailyPoints = new Map();
                 currentWeekEntries.forEach(e => {
                     const date = new Date(e.created_at).toLocaleDateString();
@@ -132,7 +122,6 @@
                 });
                 const chartData = weekDays.map(d => dailyPoints.get(d) || 0);
 
-                // Line chart
                 const weekCtx = document.getElementById('weekChart').getContext('2d');
                 new Chart(weekCtx, {
                     type: 'line',
@@ -155,7 +144,6 @@
                     }
                 });
 
-                // Aggregate subject points for pie chart
                 const subjectPoints = {};
                 entries.forEach(e => {
                     if (!subjectPoints[e.subject_id]) subjectPoints[e.subject_id] = 0;
@@ -183,11 +171,9 @@
                     }
                 });
 
-                // Total points
                 const totalPoints = entries.reduce((sum, e) => sum + e.points, 0);
                 document.getElementById('totalPoints').textContent = totalPoints;
 
-                // Render entry cards
                 const container = document.getElementById('entriesContainer');
                 entries.forEach(e => {
                     const date = new Date(e.created_at);

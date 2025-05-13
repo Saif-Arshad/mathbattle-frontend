@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard | MathBattle</title>
 
-    <!-- Tailwind + Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap"
         rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
@@ -27,14 +26,12 @@
     </script>
 
     <style>
-        /* ––––– GLOBAL BACKGROUND ––––– */
         body {
             background: linear-gradient(135deg, #1A1B1F 0%, #111113 50%, #0A0A0D 100%);
             min-height: 100vh;
             font-family: Inter, ui-sans-serif, system-ui, sans-serif;
         }
 
-        /* ––––– STARFIELD ––––– */
         .starfield {
             pointer-events: none;
             position: fixed;
@@ -54,10 +51,8 @@
             }
         }
 
-        /* ––––– GLASS CARD ––––– */
         .glass {
             perspective: 1000px;
-            /* 3‑D for flip */
             background: rgba(45, 46, 50, .65);
             backdrop-filter: blur(14px);
             border: 1px solid rgba(255, 255, 255, .08);
@@ -70,7 +65,6 @@
             box-shadow: 0 8px 24px rgba(157, 123, 237, .25);
         }
 
-        /* ––––– FLIP EFFECT ––––– */
         .glass>.card-face {
             transform-style: preserve-3d;
             transition: transform .6s;
@@ -88,7 +82,6 @@
             transform: rotateY(180deg);
         }
 
-        /* ––––– SINGLE‑CARD HERO ––––– */
         .single-card .glass {
             width: 100%;
             max-width: 420px;
@@ -108,7 +101,6 @@
             }
         }
 
-        /* ––––– ACCENT BORDERS BY ROLE ––––– */
         .admin-dashboard .glass {
             border-color: rgba(255, 140, 66, .25);
         }
@@ -125,10 +117,8 @@
 
 <body class="text-white">
 
-    <!-- Starfield background -->
     <div class="starfield"></div>
 
-    <!-- HEADER -->
     <header class="bg-neutral-800/60 backdrop-blur-md shadow-lg">
         <div class="max-w-7xl mx-auto flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
             <span class="text-2xl font-black tracking-tight">MathBattle</span>
@@ -139,7 +129,6 @@
         </div>
     </header>
 
-    <!-- MAIN -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="mb-10">
             <h1 id="dashboardHeading" class="text-4xl font-extrabold tracking-tight"></h1>
@@ -148,10 +137,8 @@
         <div id="cardsContainer" class="grid gap-6"></div>
     </main>
 
-    <!-- SCRIPT -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            /* Session check */
             const sessionRaw = localStorage.getItem('mathbattle');
             if (!sessionRaw) return (window.location.href = './login.html');
             const { userType: role } = JSON.parse(sessionRaw);
@@ -160,16 +147,12 @@
             const subtextEl = document.getElementById('dashboardSubtext');
             const container = document.getElementById('cardsContainer');
 
-            /* Redirect students away */
             if (role === 'student') return (window.location.href = './index.html');
 
-            /* Role accent class */
             document.querySelector('main').classList.add(role + '-dashboard');
 
-            /* Base grid layout */
             container.className = 'grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
 
-            /* Card factory (front + back faces) */
             const card = (href, emoji, title, desc) => `
         <a href="${href}" class="glass p-6 drop-shadow-soft relative block">
           <div class="card-face">
@@ -186,7 +169,6 @@
           </div>
         </a>`;
 
-            /* Role‑specific tiles */
             if (role === 'admin') {
                 headingEl.textContent = 'Admin Dashboard';
                 subtextEl.textContent = 'Manage your MathBattle application';
@@ -208,13 +190,11 @@
                 container.className = 'grid gap-6 grid-cols-1 sm:grid-cols-2';
             }
 
-            /* Single‑card hero mode */
             if (container.children.length === 1) {
                 document.body.classList.add('single-card');
             }
         });
 
-        /* Logout */
         document.getElementById('logoutBtn').addEventListener('click', () => {
             localStorage.removeItem('mathbattle');
             window.location.href = './login.html';

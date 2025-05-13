@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Challenge | MathBattle</title>
 
-    <!-- Tailwind + Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap"
         rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
@@ -36,7 +35,6 @@
     </script>
 
     <style>
-        /* ––– global background & starfield ––– */
         body {
             background: linear-gradient(135deg, #1A1B1F 0%, #111113 50%, #0A0A0D 100%);
             min-height: 100vh;
@@ -59,7 +57,6 @@
             opacity: .35;
         }
 
-        /* ––– frosted card ––– */
         .glass {
             background: rgba(45, 46, 50, .65);
             backdrop-filter: blur(14px);
@@ -78,7 +75,6 @@
 <body>
     <div class="starfield"></div>
 
-    <!-- ─── NAVBAR ───────────────────────────────────────── -->
     <nav class="bg-neutral-800/60 backdrop-blur-md shadow-lg">
         <div class="max-w-7xl w-full mx-auto h-16 flex items-center px-4 sm:px-6 lg:px-8">
             <button id="backBtn" class="text-gray-300 hover:text-white flex items-center gap-2">
@@ -91,9 +87,7 @@
         </div>
     </nav>
 
-    <!-- ─── MAIN ─────────────────────────────────────────── -->
     <main class="flex-grow max-w-5xl w-full mx-auto p-6">
-        <!-- Progress -->
         <section id="progressContainer" class="mb-8">
             <div class="flex justify-between mb-1 text-sm">
                 <span id="questionCounter">Question 1 of 1</span>
@@ -105,7 +99,6 @@
             </div>
         </section>
 
-        <!-- Question Card -->
         <section id="questionCard" class="glass p-8 shadow-lg mb-8">
             <h2 id="questionText" class="text-2xl font-semibold mb-6 flex items-center">
                 <svg class="animate-spin h-5 w-5 mr-3 text-brand" viewBox="0 0 24 24">
@@ -118,7 +111,6 @@
             <div id="feedback" class="mt-6 text-lg font-semibold"></div>
         </section>
 
-        <!-- Controls -->
         <div class="flex justify-end">
             <button id="submitBtn" class="px-8 py-3 bg-accent hover:bg-accent-dark font-bold text-[#0A0A0D] rounded-lg
                      disabled:opacity-50 transition shadow-lg">
@@ -126,7 +118,6 @@
             </button>
         </div>
 
-        <!-- Completion -->
         <div id="completionScreen" class="hidden text-center mt-16">
             <div class="text-6xl text-brand mb-6">🎉</div>
             <h2 class="text-4xl font-bold mb-4">Challenge Complete!</h2>
@@ -138,12 +129,9 @@
         </div>
     </main>
 
-    <!-- ─── TOAST CONTAINER ──────────────────────────────── -->
     <div id="toast-container" class="fixed top-5 right-5 space-y-2 z-50"></div>
 
-    <!-- ─── LOGIC ────────────────────────────────────────── -->
     <script>
-        /* tiny toast */
         function toast(msg, type = 'error') {
             const colors = { success: 'bg-green-600', error: 'bg-red-600' };
             const el = document.createElement('div');
@@ -152,8 +140,6 @@
             document.getElementById('toast-container').appendChild(el);
             setTimeout(() => el.remove(), 3000);
         }
-
-        /* ─── DOM refs ─── */
         const backBtn = document.getElementById('backBtn');
         const progressBar = document.getElementById('progressBar');
         const questionCounter = document.getElementById('questionCounter');
@@ -168,10 +154,8 @@
 
         backBtn.onclick = () => window.location.href = './subjects.html';
 
-        /* ─── STATE ─── */
         let questions = [], totalPoints = 0, current = 0, score = 0, answered = false;
 
-        /* ─── UTIL ─── */
         function renderQuestion() {
             const q = questions[current];
             const total = questions.length;
@@ -180,12 +164,10 @@
             submitBtn.disabled = true;
             submitBtn.textContent = 'Submit';
 
-            /* Header */
             questionCounter.textContent = `Question ${current + 1} of ${total}`;
             scoreDisplay.textContent = `Score: ${score}`;
             progressBar.style.width = `${current / total * 100}%`;
 
-            /* Body */
             questionText.textContent = q.question;
             optionsList.innerHTML = '';
             feedback.textContent = '';
@@ -197,7 +179,6 @@
                 div.innerHTML = `<input type="radio" name="opt" id="opt${i}"
                                value="${opt.text}" class="text-accent" />
                        <label for="opt${i}" class="flex-1">${opt.text}</label>`;
-                /* enable submit once chosen */
                 div.addEventListener('click', () => {
                     if (!answered) {
                         div.querySelector('input').checked = true;
@@ -216,9 +197,7 @@
             completionScreen.classList.remove('hidden');
         }
 
-        /* ─── SUBMIT BUTTON LOGIC (NO MORE EVENT OVERWRITES) ─── */
         submitBtn.addEventListener('click', () => {
-            /* case 1: not answered yet -> grade */
             if (!answered) {
                 const chosen = document.querySelector('input[name="opt"]:checked');
                 if (!chosen) { toast('Select an answer', 'error'); return; }
@@ -240,13 +219,11 @@
                     setTimeout(() => optionsList.classList.remove('animate-shake'), 400);
                 }
 
-                /* update score UI immediately */
                 scoreDisplay.textContent = `Score: ${score}`;
                 submitBtn.textContent = (current < questions.length - 1) ? 'Next' : 'Finish';
                 return;
             }
 
-            /* case 2: already answered -> move on */
             if (current < questions.length - 1) {
                 current++;
                 renderQuestion();
@@ -255,7 +232,6 @@
             }
         });
 
-        /* ─── FINISH BTN ─── */
         finishBtn.onclick = async () => {
             const session = JSON.parse(localStorage.getItem('mathbattle') || '{}');
             if (!session.userId) return (window.location.href = './index.html');
@@ -276,7 +252,6 @@
             finally { window.location.href = './subjects.html'; }
         };
 
-        /* ─── FETCH CHALLENGES ─── */
         (async () => {
             const subjectId = new URLSearchParams(location.search).get('subject');
             if (!subjectId) { toast('No subject specified', 'error'); return; }

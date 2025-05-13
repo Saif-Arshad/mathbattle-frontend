@@ -10,7 +10,6 @@
 
 <body class="bg-gradient-to-br from-[#1A1B1F] via-[#111113] to-[#0A0A0D] text-gray-100 min-h-screen flex flex-col">
 
-    <!-- Header -->
     <header class="bg-gray-900 px-6 py-4 flex justify-between items-center shadow-md">
         <h1 id="pageTitle" class="text-2xl font-bold">Loading…</h1>
         <button id="logoutBtn" class="px-4 py-2 bg-[#9D7BED] hover:bg-[#7951B2] text-[#0A0A0D] rounded-lg transition">
@@ -18,10 +17,8 @@
         </button>
     </header>
 
-    <!-- Toast container -->
     <div id="toast-container" class="fixed top-5 right-5 space-y-2 z-50"></div>
 
-    <!-- Main content -->
     <main class="flex-1 overflow-auto p-6">
         <div id="loading" class="flex justify-center items-center py-20">
             <svg class="animate-spin h-10 w-10 text-[#9D7BED]" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -48,7 +45,6 @@
     </main>
 
     <script>
-        // Simple toast helper
         function showToast(msg, type = 'error') {
             const colors = { success: 'bg-green-600', error: 'bg-red-600' };
             const d = document.createElement('div');
@@ -58,7 +54,6 @@
             setTimeout(() => d.remove(), 3000);
         }
 
-        // Logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
             localStorage.removeItem('mathbattle');
             window.location.href = './login.html';
@@ -72,11 +67,9 @@
             }
             const { access_token, userType, userId } = JSON.parse(raw);
 
-            // Set header title
             const title = userType === 'teacher' ? 'My Students' : 'My Children';
             document.getElementById('pageTitle').textContent = title;
 
-            // Pick correct endpoint
             let apiPath;
             if (userType === 'teacher') {
                 apiPath = `/teacher/${userId}/children`;
@@ -104,7 +97,6 @@
                     return document.getElementById('error').classList.remove('hidden');
                 }
 
-                // Populate table
                 const tbody = document.getElementById('studentsBody');
                 students.forEach(s => {
                     const tr = document.createElement('tr');

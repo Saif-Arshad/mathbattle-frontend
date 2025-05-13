@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login | MathBattle</title>
 
-    <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
     <script>
         tailwind.config = {
@@ -20,7 +19,6 @@
         }
     </script>
 
-    <!-- Feather Icons -->
     <script src="https://unpkg.com/feather-icons"></script>
 
     <style>
@@ -35,7 +33,6 @@
 <body
     class="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-neutral-900 text-gray-100 flex items-center justify-center">
 
-    <!-- Toast Container -->
     <div id="toast-container" class="fixed top-5 right-5 space-y-2 z-50"></div>
 
     <div class="mx-auto flex w-full max-w-6xl shadow-lg rounded-3xl overflow-hidden">
@@ -46,7 +43,6 @@
             </header>
 
             <form id="loginForm" class="space-y-6">
-                <!-- Email -->
                 <div>
                     <label for="email" class="block text-sm font-medium mb-1">Email</label>
                     <div class="relative">
@@ -58,7 +54,6 @@
                     </div>
                 </div>
 
-                <!-- Password -->
                 <div>
                     <label for="password" class="block text-sm font-medium mb-1">Password</label>
                     <div class="relative">
@@ -70,7 +65,6 @@
                     </div>
                 </div>
 
-                <!-- Submit Button -->
                 <button id="submitBtn" type="submit"
                     class="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-[#9D7BED] hover:bg-primary-600 transition focus:outline-none focus:ring-2 focus:ring-primary/50 font-semibold">
                     <span id="btnText">Sign In</span>
@@ -83,7 +77,6 @@
                 </button>
             </form>
 
-            <!-- Divider -->
             <div class="my-8 flex items-center gap-3">
                 <hr class="flex-grow border-neutral-700" />
                 <span class="text-xs uppercase tracking-wider text-gray-500">or</span>
@@ -171,7 +164,6 @@
                 console.error(err);
                 showToast('Network error. Please try again.', 'error');
             } finally {
-                // Reset button
                 submitBtn.disabled = false;
                 btnText.textContent = 'Sign In';
                 btnSpinner.classList.add('hidden');

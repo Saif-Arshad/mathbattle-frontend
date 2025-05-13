@@ -10,15 +10,12 @@
 
 <body class="bg-gradient-to-br from-[#1A1B1F] via-[#111113] to-[#0A0A0D] min-h-screen text-gray-100">
 
-    <!-- Toast container -->
     <div id="toast-container" class="fixed top-5 right-5 space-y-2 z-50"></div>
 
-    <!-- Main content -->
     <main class="max-w-6xl mx-auto px-4 py-8">
         <h1 class="text-3xl font-bold text-white">Manage Users</h1>
         <p class="mb-6 text-gray-400">Here you can assign teachers or parents to student accounts, or delete users.</p>
 
-        <!-- Loading spinner -->
         <div id="loading" class="flex justify-center items-center py-20">
             <svg class="animate-spin h-10 w-10 text-[#9D7BED]" xmlns="http://www.w3.org/2000/svg" fill="none"
                 viewBox="0 0 24 24">
@@ -27,7 +24,6 @@
             </svg>
         </div>
 
-        <!-- Table container -->
         <div id="tableContainer" class="overflow-x-auto hidden">
             <table class="min-w-full table-auto rounded-lg overflow-hidden border border-gray-700">
                 <thead>
@@ -44,7 +40,6 @@
         </div>
     </main>
 
-    <!-- Assign Modal -->
     <div id="assignModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden">
         <div class="bg-[#1F2937] rounded-2xl p-6 w-full max-w-lg">
             <h2 id="modalTitle" class="text-xl font-bold text-white mb-4"></h2>
@@ -184,7 +179,6 @@
                     };
                 });
 
-                // Modal references
                 const modal = document.getElementById('assignModal');
                 const mt = document.getElementById('modalTitle');
                 const msl = document.getElementById('modalSelectLabel');
@@ -202,21 +196,18 @@
                     mt.textContent = `Assign ${type} to ${student.full_name || 'Unnamed'}`;
                     msl.textContent = `Select ${type}`;
 
-                    // Determine current assignment
                     const currentAssignmentId = type === 'teacher' ? student.teacher : student.parent;
                     const assignmentList = type === 'teacher' ? teachers : parents;
                     const currentAssignmentUser = currentAssignmentId
                         ? assignmentList.find(u => String(u._id) === String(currentAssignmentId))
                         : null;
 
-                    // Display current assignment
                     if (currentAssignmentUser) {
                         currentAssignmentEl.textContent = `Currently assigned: ${currentAssignmentUser.full_name || currentAssignmentUser.email}`;
                     } else {
                         currentAssignmentEl.textContent = `No ${type} assigned`;
                     }
 
-                    // Populate select options and pre-select current assignment
                     ms.innerHTML = '';
                     assignmentList.forEach(x => {
                         const option = document.createElement('option');

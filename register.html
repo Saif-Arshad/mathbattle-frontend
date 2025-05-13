@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Register | MathBattle</title>
 
-    <!-- Tailwind (stand‑alone CDN build) -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
     <script>
         tailwind.config = {
@@ -20,7 +19,6 @@
         };
     </script>
 
-    <!-- Heroicons -->
     <script src="https://unpkg.com/feather-icons"></script>
 
     <style>
@@ -35,7 +33,6 @@
 <body
     class="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-neutral-900 text-gray-100 flex items-center justify-center">
 
-    <!-- Toast Container -->
     <div id="toast-container" class="fixed top-5 right-5 space-y-2 z-50"></div>
 
     <div class="mx-auto flex w-full max-w-6xl shadow-lg rounded-3xl overflow-hidden">
@@ -54,7 +51,6 @@
                 </p>
             </header>
 
-            <!-- Role Tabs -->
             <div class="mb-6 flex rounded-lg overflow-hidden border border-neutral-700">
                 <button type="button" data-role="student"
                     class="flex-1 py-2 text-center bg-primary text-[#0A0A0D] font-medium" id="tab-student">
@@ -72,7 +68,6 @@
             <input type="hidden" name="role" id="role" value="student">
 
             <form id="registerForm" class="space-y-6">
-                <!-- Full Name -->
                 <div>
                     <label for="fullName" class="block text-sm font-medium mb-1">Full Name</label>
                     <div class="relative">
@@ -84,7 +79,6 @@
                     </div>
                 </div>
 
-                <!-- Email -->
                 <div>
                     <label for="email" class="block text-sm font-medium mb-1">Email</label>
                     <div class="relative">
@@ -96,7 +90,6 @@
                     </div>
                 </div>
 
-                <!-- Password -->
                 <div>
                     <label for="password" class="block text-sm font-medium mb-1">Password</label>
                     <div class="relative">
@@ -108,7 +101,6 @@
                     </div>
                 </div>
 
-                <!-- Submit -->
                 <button id="submitBtn" type="submit"
                     class="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-primary hover:bg-[#7951B2] transition focus:outline-none focus:ring-2 focus:ring-primary/50 font-semibold">
                     <span id="btnText">Sign Up</span>
@@ -136,7 +128,6 @@
     <script>
         feather.replace();
 
-        // Role Tab Logic
         document.querySelectorAll('[data-role]').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('[data-role]').forEach(b => {
@@ -149,7 +140,6 @@
             });
         });
 
-        // Form Submit
         const form = document.getElementById('registerForm');
         const submitBtn = document.getElementById('submitBtn');
         const btnText = document.getElementById('btnText');
