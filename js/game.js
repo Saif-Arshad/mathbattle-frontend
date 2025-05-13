@@ -1,29 +1,32 @@
-// Initialize Socket.IO connection with proper configuration
 const socket = io('http://localhost:8000', {
+    path: '/socket.io/',
     transports: ['websocket', 'polling'],
     cors: {
-        origin: "http://127.0.0.1:5500",
+        origin: "*",
         credentials: true
     },
     reconnection: true,
     reconnectionAttempts: 5,
-    reconnectionDelay: 1000
+    reconnectionDelay: 1000,
+    autoConnect: true
 });
 
-// Add connection status handlers
 socket.on('connect', () => {
     console.log('Connected to server');
 });
 
 socket.on('connect_error', (error) => {
     console.error('Connection error:', error);
+    if (socket.io.engine.transport.name === 'websocket') {
+        socket.io.engine.transport.name = 'polling';
+        socket.connect();
+    }
 });
 
 socket.on('reconnect', (attemptNumber) => {
     console.log('Reconnected on attempt:', attemptNumber);
 });
 
-// DOM Elements
 const loginScreen = document.getElementById('login-screen');
 const waitingScreen = document.getElementById('waiting-screen');
 const gameScreen = document.getElementById('game-screen');
@@ -43,7 +46,6 @@ let currentPlayer = null;
 let gameRoom = null;
 let gameActive = false;
 
-// Event Listeners
 joinButton.addEventListener('click', () => {
     const playerName = playerNameInput.value.trim();
     if (playerName) {
@@ -90,7 +92,6 @@ function resetGame() {
     answerInput.value = '';
 }
 
-// Socket Event Handlers
 socket.on('game_start', (data) => {
     waitingScreen.classList.add('hidden');
     gameScreen.classList.remove('hidden');
@@ -98,12 +99,10 @@ socket.on('game_start', (data) => {
     gameActive = true;
     questionDisplay.textContent = data.question;
     
-    // Reset timer animation
     timerBar.style.animation = 'none';
-    timerBar.offsetHeight; // Trigger reflow
+    timerBar.offsetHeight; 
     timerBar.style.animation = null;
     
-    // Start game timer
     setTimeout(() => {
         if (gameActive) {
             socket.emit('game_over', { room: gameRoom });
@@ -115,7 +114,6 @@ socket.on('score_update', (data) => {
     const scores = data.scores;
     const players = Object.keys(scores);
     
-    // Update scores
     if (players[0] === socket.id) {
         playerScore.textContent = scores[players[0]];
         opponentScore.textContent = scores[players[1]];
@@ -124,7 +122,6 @@ socket.on('score_update', (data) => {
         opponentScore.textContent = scores[players[0]];
     }
     
-    // Update question
     questionDisplay.textContent = data.question;
 });
 
