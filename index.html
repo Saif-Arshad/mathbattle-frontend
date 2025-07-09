@@ -119,69 +119,53 @@
     </div>
 
     <section class="w-full bg-gradient-to-br from-[#1A1B1F] via-[#111113] to-[#0A0A0D] py-16">
-        <div class="max-w-6xl mx-auto px-4">
-            <h2 class="text-3xl font-bold text-white text-center mb-12">Choose Your Challenge</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="game-card bg-neutral-800 rounded-xl shadow-lg overflow-hidden">
-                    <div class="relative">
-                       
-                        <div class="absolute top-4 right-4 bg-green-500 text-white text-sm px-3 py-1 rounded-full">
-                            Live
+        <div class="max-w-4xl mx-auto px-4">
+            <h2 class="text-3xl font-bold text-white text-center mb-12 drop-shadow-lg tracking-wide">Choose Your Challenge</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <!-- Real-time MathBattle Card -->
+                <div class="relative group rounded-2xl overflow-hidden flex flex-col shadow-2xl border border-[#9D7BED33] bg-gradient-to-br from-[#232336]/80 to-[#18181B]/90 backdrop-blur-lg transition-all duration-200 hover:border-[#9D7BED] hover:shadow-brand-glow hover:scale-[1.03]">
+                    <div class="absolute top-4 right-4 bg-green-500/90 text-white text-xs px-3 py-1 rounded-full font-bold shadow">Live</div>
+                    <div class="flex-1 flex flex-col items-center justify-center p-8">
+                        <div class="mb-6">
+                            <svg class="h-16 w-16 text-[#9D7BED] drop-shadow-[0_0_24px_rgba(157,123,237,0.7)] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold text-gray-100 mb-2">MathBattle Real-time</h3>
-                        <p class="text-gray-200 mb-4">
-                            Challenge other players in real-time math competitions. Solve problems quickly and accurately to win!
-                        </p>
-                       
-                        <a href="mathbattle.html" 
-                        class="mt-4 inline-block w-full text-center bg-[#9D7BED] hover:bg-[#7951B2] text-[#0A0A0D] px-4 py-2 rounded-lg font-semibold transition">
-
-                            Play Now
-                        </a>
+                        <h3 class="text-2xl font-extrabold text-white mb-3 tracking-wide drop-shadow">MathBattle Real-time</h3>
+                        <p class="text-gray-300 mb-6 text-center">Challenge other players in real-time math competitions. Solve problems quickly and accurately to win!</p>
+                        <a href="mathbattle.html" class="mt-auto inline-block w-full text-center bg-[#9D7BED] hover:bg-[#7951B2] text-[#0A0A0D] px-6 py-3 rounded-lg font-semibold transition shadow-lg text-lg">Play Now</a>
                     </div>
                 </div>
-                <div
-                    class="bg-neutral-800 rounded-2xl shadow-xl border border-[#2D2E32] p-6 flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-2xl font-semibold text-white mb-2">Calculation Sprint</h3>
-                        <p class="text-[#C0BFC2] mb-4">Test your math speed! Solve as many problems as you can in 30
-                            seconds
-                            and rack up points.</p>
+                <!-- Calculation Sprint Card -->
+                <div class="relative group rounded-2xl overflow-hidden flex flex-col shadow-2xl border border-[#FF8C4233] bg-gradient-to-br from-[#232336]/80 to-[#18181B]/90 backdrop-blur-lg transition-all duration-200 hover:border-[#FF8C42] hover:shadow-accent-glow hover:scale-[1.03]">
+                    <div class="flex-1 flex flex-col items-center justify-center p-8">
+                        <div class="mb-6">
+                            <svg class="h-16 w-16 text-[#FF8C42] drop-shadow-[0_0_24px_rgba(255,140,66,0.7)] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"/></svg>
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-white mb-3 tracking-wide drop-shadow">Calculation Sprint</h3>
+                        <p class="text-gray-300 mb-6 text-center">Test your math speed! Solve as many problems as you can in 30 seconds and rack up points.</p>
+                        <a href="./Game/one.html" class="mt-auto inline-block w-full text-center bg-[#FF8C42] hover:bg-[#d46a1a] text-[#0A0A0D] px-6 py-3 rounded-lg font-semibold transition shadow-lg text-lg">Play Now</a>
                     </div>
-                    <a href="./Game/one.html"
-                        class="mt-4 inline-block text-center bg-[#9D7BED] hover:bg-[#7951B2] text-[#0A0A0D] px-4 py-2 rounded-lg font-semibold transition">
-                        Play Now
-                    </a>
                 </div>
                 <!-- Dice Challenge Card -->
-                <div
-                    class="bg-neutral-800  rounded-2xl shadow-xl border border-[#2D2E32] p-6 flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-2xl font-semibold text-white mb-2">Dice Challenge</h3>
-                        <p class="text-[#C0BFC2] mb-4">Roll the dice and use all numbers to form an expression matching
-                            the
-                            target. Strategy meets chance!</p>
+                <div class="relative group rounded-2xl overflow-hidden flex flex-col shadow-2xl border border-[#9D7BED33] bg-gradient-to-br from-[#232336]/80 to-[#18181B]/90 backdrop-blur-lg transition-all duration-200 hover:border-[#9D7BED] hover:shadow-brand-glow hover:scale-[1.03]">
+                    <div class="flex-1 flex flex-col items-center justify-center p-8">
+                        <div class="mb-6">
+                            <svg class="h-16 w-16 text-[#9D7BED] drop-shadow-[0_0_24px_rgba(157,123,237,0.7)] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1.5"/><circle cx="16" cy="8" r="1.5"/><circle cx="8" cy="16" r="1.5"/><circle cx="16" cy="16" r="1.5"/></svg>
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-white mb-3 tracking-wide drop-shadow">Dice Challenge</h3>
+                        <p class="text-gray-300 mb-6 text-center">Roll the dice and use all numbers to form an expression matching the target. Strategy meets chance!</p>
+                        <a href="./Game/dice.html" class="mt-auto inline-block w-full text-center bg-[#9D7BED] hover:bg-[#7951B2] text-[#0A0A0D] px-6 py-3 rounded-lg font-semibold transition shadow-lg text-lg">Play Now</a>
                     </div>
-                    <a href="./Game/dice.html"
-                        class="mt-4 inline-block text-center bg-[#9D7BED] hover:bg-[#7951B2] text-[#0A0A0D] px-4 py-2 rounded-lg font-semibold transition">
-                        Play Now
-                    </a>
                 </div>
                 <!-- Math Puzzle Card -->
-                <div
-                    class="bg-neutral-800  rounded-2xl shadow-xl border border-[#2D2E32] p-6 flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-2xl font-semibold text-white mb-2">Math Puzzle</h3>
-                        <p class="text-[#C0BFC2] mb-4">Use the given numbers exactly once to form an expression that
-                            equals
-                            the target number. Are you up for the puzzle?</p>
+                <div class="relative group rounded-2xl overflow-hidden flex flex-col shadow-2xl border border-[#FF8C4233] bg-gradient-to-br from-[#232336]/80 to-[#18181B]/90 backdrop-blur-lg transition-all duration-200 hover:border-[#FF8C42] hover:shadow-accent-glow hover:scale-[1.03]">
+                    <div class="flex-1 flex flex-col items-center justify-center p-8">
+                        <div class="mb-6">
+                            <svg class="h-16 w-16 text-[#FF8C42] drop-shadow-[0_0_24px_rgba(255,140,66,0.7)] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8 8h8v8H8z"/></svg>
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-white mb-3 tracking-wide drop-shadow">Math Puzzle</h3>
+                        <p class="text-gray-300 mb-6 text-center">Use the given numbers exactly once to form an expression that equals the target number. Are you up for the puzzle?</p>
+                        <a href="./Game/puzzle.html" class="mt-auto inline-block w-full text-center bg-[#FF8C42] hover:bg-[#d46a1a] text-[#0A0A0D] px-6 py-3 rounded-lg font-semibold transition shadow-lg text-lg">Play Now</a>
                     </div>
-                    <a href="./Game/puzzle.html"
-                        class="mt-4 inline-block text-center bg-[#9D7BED] hover:bg-[#7951B2] text-[#0A0A0D] px-4 py-2 rounded-lg font-semibold transition">
-                        Play Now
-                    </a>
                 </div>
             </div>
         </div>
@@ -220,7 +204,7 @@
                         <svg class="w-5 h-5 fill-orange-500 text-orange-500" xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 20 20">
                             <path
-                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784 .57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
                         <svg class="w-5 h-5 fill-orange-500 text-orange-500" xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 20 20">
@@ -230,7 +214,7 @@
                         <svg class="w-5 h-5 fill-orange-500 text-orange-500" xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 20 20">
                             <path
-                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3 .921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784 .57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3 .921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784 .57-1.838-.197-1.539WAR-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
                         <svg class="w-5 h-5 fill-orange-500 text-orange-500" xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 20 20">
@@ -317,7 +301,7 @@
                         <svg class="w-5 h-5 fill-orange-500 text-orange-500" xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 20 20">
                             <path
-                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3 .921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784 .57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3 .921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784 .57-1.838-.197-1.539WAR-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
                         <svg class="w-5 h-5 text-gray-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                             <path
@@ -421,3 +405,12 @@
 </body>
 
 </html>
+
+<style>
+  .shadow-brand-glow {
+    box-shadow: 0 0 24px 0 #9D7BED55, 0 2px 8px 0 #0003;
+  }
+  .shadow-accent-glow {
+    box-shadow: 0 0 24px 0 #FF8C4255, 0 2px 8px 0 #0003;
+  }
+</style>
