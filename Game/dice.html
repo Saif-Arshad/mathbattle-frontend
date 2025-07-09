@@ -29,7 +29,7 @@
                     </svg>
                     <span class="text-xl font-semibold text-white">Dice Challenge</span>
                 </div>
-
+                <div id="level-display" class="px-4 py-2 bg-[#2D3748] rounded-full text-[#C0BFC2] ml-4">Level: <span id="level">1</span></div>
             </div>
 
             <!-- Score & Target -->
@@ -54,6 +54,10 @@
                     <button id="roll-btn"
                         class="bg-[#9D7BED] hover:bg-[#7951B2] text-[#0A0A0D] px-8 py-3 rounded-lg font-semibold transition">
                         Roll Dice
+                    </button>
+                    <button id="next-level-btn" style="display:none;"
+                        class="ml-4 bg-green-500 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold transition">
+                        Next Level
                     </button>
                 </div>
 
@@ -86,7 +90,9 @@
     </section>
 
     <script>
-        let dice = [null, null, null, null];
+        let level = 1;
+        let diceCount = 4;
+        let dice = Array(diceCount).fill(null);
         let isRolling = false;
         let score = 0;
         let attempts = 0;
@@ -102,6 +108,8 @@
         const expressionInput = document.getElementById('expression');
         const tipText = document.getElementById('tip-text');
         const toastContainer = document.getElementById('toast-container');
+        const levelEl = document.getElementById('level');
+        const nextLevelBtn = document.getElementById('next-level-btn');
         const tips = [
             "Try using multiplication before addition",
             "Parentheses can change the order of operations",
@@ -117,6 +125,10 @@
             setTimeout(() => toast.remove(), 3000);
         }
 
+        function updateLevelDisplay() {
+            levelEl.textContent = level;
+        }
+
         function spawnDice() {
             diceGrid.innerHTML = '';
             dice.forEach(val => {
@@ -128,7 +140,10 @@
         }
 
         function newTarget() {
-            target = Math.floor(Math.random() * 20) + 10;
+            // Increase target range with level
+            const min = 10 + (level - 1) * 5;
+            const max = 20 + (level - 1) * 10;
+            target = Math.floor(Math.random() * (max - min + 1)) + min;
             targetEl.textContent = target;
         }
 
@@ -139,7 +154,9 @@
         function rollDice() {
             if (isRolling) return;
             isRolling = true;
-            dice = dice.map(() => Math.floor(Math.random() * 6) + 1);
+            // Increase dice count every 3 levels, max 8
+            diceCount = Math.min(4 + Math.floor((level - 1) / 3), 8);
+            dice = Array(diceCount).fill(null).map(() => Math.floor(Math.random() * 6) + 1);
             spawnDice();
             rollBtn.textContent = 'Rolling...';
 
@@ -166,13 +183,14 @@
             try {
                 const result = eval(expr);
                 if (result === target) {
-                    score += 2;
+                    score += 2 * level;
                     scoreEl.textContent = score;
                     showToast('Correct!', 'Expression matches target!');
                     expressionInput.value = '';
-                    dice = [null, null, null, null];
+                    dice = Array(diceCount).fill(null);
                     spawnDice();
-                    newTarget();
+                    nextLevelBtn.style.display = 'inline-block';
+                    rollBtn.disabled = true;
                 } else {
                     showToast('Incorrect', `Got ${result}, not ${target}`, 'error');
                 }
@@ -181,13 +199,30 @@
             }
         }
 
+        function startLevel() {
+            updateLevelDisplay();
+            nextLevelBtn.style.display = 'none';
+            rollBtn.disabled = false;
+            expressionArea.classList.add('hidden');
+            expressionInput.value = '';
+            attempts = 0;
+            attemptsEl.textContent = attempts;
+            newTarget();
+            dice = Array(diceCount).fill(null);
+            spawnDice();
+        }
+
+        nextLevelBtn.addEventListener('click', function () {
+            level++;
+            startLevel();
+        });
+
         rollBtn.addEventListener('click', rollDice);
         checkBtn.addEventListener('click', checkExpression);
         document.getElementById('back-btn').addEventListener('click', () => window.location.href = '/games');
 
         // init
-        newTarget();
-        spawnDice();
+        startLevel();
     </script>
 </body>
 

@@ -163,22 +163,33 @@
 
                 data.forEach(subject => {
                     const card = document.createElement('div');
-                    card.className = 'subject-card p-6 drop-shadow-soft flex flex-col gap-4';
+                    card.className = 'subject-card p-0 drop-shadow-xl flex flex-col gap-0 overflow-hidden border-2 border-brand/10 hover:border-brand transition-all duration-200';
 
                     card.innerHTML = `
-            <span class="text-xs bg-brand px-3 py-1 rounded-full w-fit capitalize">${subject.category}</span>
-            <h3 class="text-2xl font-semibold text-white">${subject.name}</h3>
-            <p class="text-gray-300 flex-grow">${subject.discription}</p>
-            <a href="./challenges.html?subject=${subject._id}"
-               class="mt-auto inline-flex items-center justify-center gap-2 w-full py-3 rounded-lg
-                      bg-gradient-to-r from-brand to-brand-dark font-semibold text-[#0A0A0D]
-                      hover:drop-shadow-soft transition">
-              Start&nbsp;Challenge
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-              </svg>
-            </a>
-          `;
+                  <div class="bg-gradient-to-r from-brand/80 to-brand-dark/80 px-6 py-3 flex items-center gap-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-[#0A0A0D] bg-white/80 px-3 py-1 rounded-full shadow">${subject.category}</span>
+                  </div>
+                  <div class="flex flex-col flex-1 p-6 gap-2">
+                    <h3 class="text-2xl font-extrabold text-white mb-1 drop-shadow">${subject.name}</h3>
+                    <p class="text-gray-300 flex-grow mb-4">${subject.discription}</p>
+                    <div class="flex gap-2 mt-auto">
+                      <a href="./challenges.html?subject=${subject._id}"
+                        class="inline-flex items-center justify-center gap-2 flex-1 py-3 rounded-lg bg-gradient-to-r from-brand to-brand-dark font-semibold text-[#0A0A0D] hover:scale-105 hover:drop-shadow-lg transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                        </svg>
+                        Start&nbsp;Challenge
+                      </a>
+                      <a href="./leaderboard.html?subject=${subject._id}"
+                        class="inline-flex items-center justify-center gap-2 flex-1 py-3 rounded-lg bg-gradient-to-r from-accent to-accent-dark font-semibold text-[#0A0A0D] hover:scale-105 hover:drop-shadow-lg transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 17l6-6 4 4 8-8"/>
+                        </svg>
+                        Leaderboard
+                      </a>
+                    </div>
+                  </div>
+                `;
                     grid.appendChild(card);
                 });
 

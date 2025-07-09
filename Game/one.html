@@ -30,6 +30,7 @@
                         </svg>
                         <h2 class="text-xl font-semibold text-white">Calculation Sprint</h2>
                     </div>
+                    <div id="level-display" class="px-4 py-2 bg-[#2D3748] rounded-full text-[#C0BFC2] ml-4">Level: <span id="level">1</span></div>
                 </div>
 
                 <div id="game-content" class="p-6">
@@ -44,6 +45,10 @@
                         <button id="start-btn"
                             class="mt-6 inline-flex items-center gap-2 bg-[#9D7BED] text-[#0A0A0D] px-8 py-3 rounded-lg text-lg font-semibold hover:bg-[#7951B2] transition">
                             Start Sprint!</button>
+                        <button id="next-level-btn" style="display:none;"
+                            class="ml-4 bg-green-500 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold transition">
+                            Next Level
+                        </button>
                     </div>
                 </div>
 
@@ -60,11 +65,14 @@
     </section>
 
     <script>
+        let level = 1;
         let isActive = false;
         let score = 0;
         let timeLeft = 30;
         let problem = { num1: 0, num2: 0, operator: "+", answer: "" };
         let timer = null;
+        const levelEl = document.getElementById('level');
+        const nextLevelBtn = document.getElementById('next-level-btn');
 
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
@@ -74,22 +82,26 @@
             setTimeout(() => toast.remove(), 3000);
         }
 
+        function updateLevelDisplay() {
+            levelEl.textContent = level;
+        }
+
         function generateProblem() {
             const operators = ['+', '-', '*'];
             const operator = operators[Math.floor(Math.random() * operators.length)];
             let num1, num2;
             switch (operator) {
                 case '+':
-                    num1 = Math.floor(Math.random() * 50) + 1;
-                    num2 = Math.floor(Math.random() * 50) + 1;
+                    num1 = Math.floor(Math.random() * (50 + level * 10)) + 1;
+                    num2 = Math.floor(Math.random() * (50 + level * 10)) + 1;
                     break;
                 case '-':
-                    num1 = Math.floor(Math.random() * 50) + 10;
+                    num1 = Math.floor(Math.random() * (50 + level * 10)) + 10;
                     num2 = Math.floor(Math.random() * num1);
                     break;
                 case '*':
-                    num1 = Math.floor(Math.random() * 12) + 1;
-                    num2 = Math.floor(Math.random() * 12) + 1;
+                    num1 = Math.floor(Math.random() * (12 + level * 2)) + 1;
+                    num2 = Math.floor(Math.random() * (12 + level * 2)) + 1;
                     break;
             }
             return { num1, num2, operator, answer: "" };
@@ -98,10 +110,12 @@
         function startGame() {
             isActive = true;
             score = 0;
-            timeLeft = 30;
+            // Decrease time as level increases, min 10s
+            timeLeft = Math.max(30 - (level - 1) * 2, 10);
             problem = generateProblem();
+            updateLevelDisplay();
             updateGameUI();
-            showToast("Calculation Sprint Started! Solve as many problems as you can in 30 seconds!");
+            showToast("Calculation Sprint Started! Solve as many problems as you can in " + timeLeft + " seconds!");
             timer = setInterval(() => {
                 timeLeft--;
                 updateGameUI();
@@ -118,9 +132,14 @@
                     <h3 class="text-2xl font-semibold text-white mb-4">Time's Up!</h3>
                     <p class="text-lg text-[#C0BFC2]">Your final score: <span class="font-bold text-[#9D7BED]">${score}</span> points</p>
                     <button id="play-again-btn" class="mt-6 inline-flex items-center gap-2 bg-[#9D7BED] text-[#0A0A0D] px-8 py-3 rounded-lg text-lg font-semibold hover:bg-[#7951B2] transition">Play Again</button>
+                    <button id="next-level-btn-end" class="ml-4 bg-green-500 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold transition">Next Level</button>
                 </div>
             `;
             document.getElementById('play-again-btn').addEventListener('click', startGame);
+            document.getElementById('next-level-btn-end').addEventListener('click', function() {
+                level++;
+                startGame();
+            });
         }
 
         function checkAnswer() {
@@ -132,8 +151,8 @@
                 case '*': correctAnswer = problem.num1 * problem.num2; break;
             }
             if (parseInt(problem.answer) === correctAnswer) {
-                score++;
-                showToast("Correct! +1 point");
+                score += level;
+                showToast("Correct! +" + level + " point(s)");
             } else {
                 showToast(`Incorrect. The answer was ${correctAnswer}`, 'error');
             }
@@ -169,6 +188,11 @@
             input.addEventListener('keypress', (e) => { if (e.key === 'Enter') checkAnswer(); });
             input.focus();
         }
+
+        nextLevelBtn && nextLevelBtn.addEventListener('click', function () {
+            level++;
+            startGame();
+        });
 
         document.getElementById('start-btn').addEventListener('click', startGame);
         document.getElementById('back-btn').addEventListener('click', () => {

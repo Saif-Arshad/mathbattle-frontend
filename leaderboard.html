@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leaderboard | MathBattle</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui'] },
+        extend: {
+          colors: {
+            brand: { DEFAULT: '#9D7BED', dark: '#7951B2' },
+            accent: { DEFAULT: '#FF8C42', dark: '#D46E1F' },
+            neutral: { 900: '#1A1B1F', 800: '#111113', 700: '#0A0A0D' },
+          },
+          dropShadow: { soft: '0 8px 24px rgba(157,123,237,.25)' }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #1A1B1F 0%, #111113 50%, #0A0A0D 100%);
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      color: #e5e5e5;
+    }
+    .starfield {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(2px 2px at 25% 40%, rgba(157, 123, 237, .8) 0, transparent 60%),
+        radial-gradient(1px 1px at 70% 70%, rgba(255, 140, 66, .8) 0, transparent 60%),
+        radial-gradient(1.5px 1.5px at 40% 80%, rgba(255, 255, 255, .6) 0, transparent 60%);
+      background-size: 400px 400px;
+      animation: drift 60s linear infinite;
+      opacity: .35;
+    }
+    @keyframes drift {
+      to { background-position: -800px 800px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="starfield"></div>
+  <nav class="bg-neutral-800/60 backdrop-blur-md shadow-lg">
+    <div class="max-w-7xl mx-auto h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8">
+      <h1 class="text-white text-xl font-extrabold tracking-wider">🏆 Leaderboard</h1>
+      <a href="./subjects.html">
+        <button class="px-4 py-2 bg-brand hover:bg-brand-dark text-[#0A0A0D] rounded-lg font-semibold">
+          ← Back
+        </button>
+      </a>
+    </div>
+  </nav>
+  <header class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <h2 id="subject-title" class="text-4xl font-extrabold text-white mb-3">Leaderboard</h2>
+    <p class="text-lg text-gray-300">See the top scorers for this subject.</p>
+  </header>
+  <div id="loading" class="flex justify-center items-center py-20">
+    <svg class="animate-spin h-10 w-10 text-brand" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+    </svg>
+  </div>
+  <div id="error-message" class="hidden text-center text-red-500 text-lg px-4"></div>
+  <section id="leaderboard-container" class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 hidden">
+    <div class="overflow-x-auto">
+      <table class="min-w-full bg-[#23232a] rounded-xl overflow-hidden shadow-xl">
+        <thead>
+          <tr class="bg-brand/20">
+            <th class="px-6 py-4 text-left text-xs font-bold text-brand uppercase tracking-wider">Rank</th>
+            <th class="px-6 py-4 text-left text-xs font-bold text-brand uppercase tracking-wider">User</th>
+            <th class="px-6 py-4 text-left text-xs font-bold text-brand uppercase tracking-wider">Score</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboard-body">
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <script>
+    function getQueryParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name);
+    }
+    function toast(msg, type = 'success') {
+      const colors = { success: 'bg-green-600', error: 'bg-red-600' };
+      const el = document.createElement('div');
+      el.textContent = msg;
+      el.className = `fixed top-5 right-5 px-4 py-2 text-white rounded shadow z-50 ${colors[type]}`;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 3000);
+    }
+    document.addEventListener('DOMContentLoaded', async () => {
+      const subjectId = getQueryParam('subject');
+      const loading = document.getElementById('loading');
+      const errorEl = document.getElementById('error-message');
+      const container = document.getElementById('leaderboard-container');
+      const tbody = document.getElementById('leaderboard-body');
+      const subjectTitle = document.getElementById('subject-title');
+      if (!subjectId) {
+        loading.remove();
+        errorEl.textContent = 'No subject specified.';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+      try {
+        // Fetch subject info
+        const subjectRes = await fetch(`http://127.0.0.1:8000/subjects/${subjectId}`);
+        const subjectData = await subjectRes.json();
+        if (!subjectRes.ok) throw new Error(subjectData.detail || 'Failed to load subject');
+        subjectTitle.textContent = `Leaderboard: ${subjectData.name}`;
+        // Fetch leaderboard data
+        const res = await fetch(`http://127.0.0.1:8000/progress/leaderboard/${subjectId}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Failed to load leaderboard');
+        loading.remove();
+        container.classList.remove('hidden');
+        tbody.innerHTML = '';
+        if (!Array.isArray(data) || data.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="3" class="text-center text-gray-400 py-8">No scores yet for this subject.</td></tr>`;
+        } else {
+          data.forEach((entry, idx) => {
+            tbody.innerHTML += `
+              <tr class="${idx % 2 === 0 ? 'bg-[#23232a]' : 'bg-[#28283a]'} hover:bg-brand/10 transition">
+                <td class="px-6 py-4 font-bold text-brand">${idx + 1}</td>
+                <td class="px-6 py-4 text-white font-semibold flex items-center gap-2">
+                  <svg class="h-6 w-6 text-accent" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+                  ${entry.username || 'Anonymous'}
+                </td>
+                <td class="px-6 py-4 text-accent font-bold">${entry.score}</td>
+              </tr>
+            `;
+          });
+        }
+      } catch (err) {
+        loading.remove();
+        tbody.innerHTML = '';
+        errorEl.textContent = `Error: ${err.message}`;
+        errorEl.classList.remove('hidden');
+        toast(err.message, 'error');
+      }
+    });
+  </script>
+</body>
+</html> 

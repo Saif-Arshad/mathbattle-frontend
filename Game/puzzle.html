@@ -28,6 +28,7 @@
                         d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                 </svg>
                 <span class="text-xl font-semibold text-white">Math Puzzle Challenge</span>
+                <div id="level-display" class="px-4 py-2 bg-[#2D3748] rounded-full text-[#C0BFC2] ml-4">Level: <span id="level">1</span></div>
             </div>
 
             <!-- Target -->
@@ -61,6 +62,10 @@
                     class="px-6 py-2 bg-[#9D7BED] text-[#0A0A0D] rounded-lg font-semibold hover:bg-[#7951B2] transition">
                     Check Answer
                 </button>
+                <button id="next-level-btn" style="display:none;"
+                    class="ml-4 bg-green-500 hover:bg-green-700 text-white px-8 py-2 rounded-lg font-semibold transition">
+                    Next Level
+                </button>
             </div>
 
             <!-- Result Message -->
@@ -69,18 +74,31 @@
     </section>
 
     <script>
+        let level = 1;
         const targetEl = document.getElementById('target');
         const numbersGrid = document.getElementById('numbers-grid');
         const exprInput = document.getElementById('expression');
         const checkBtn = document.getElementById('check-btn');
+        const nextLevelBtn = document.getElementById('next-level-btn');
         const backBtn = document.getElementById('back-btn');
         const resultMsg = document.getElementById('result-msg');
         const toastContainer = document.getElementById('toast-container');
+        const levelEl = document.getElementById('level');
 
-        let puzzle = {
-            target: 24,
-            numbers: [4, 7, 8, 9]
-        };
+        let puzzle = generatePuzzle(level);
+
+        function updateLevelDisplay() {
+            levelEl.textContent = level;
+        }
+
+        function generatePuzzle(level) {
+            // Increase number count and target with level
+            const numCount = Math.min(4 + Math.floor((level - 1) / 2), 8);
+            const numbers = Array(numCount).fill(0).map(() => Math.floor(Math.random() * (9 + level * 2)) + 1);
+            // Target is sum of random subset plus/minus a random offset
+            let target = numbers.slice(0, 3).reduce((a, b) => a + b, 0) + Math.floor(Math.random() * (level * 2 + 1)) - level;
+            return { target, numbers };
+        }
 
         function showToast(title, desc, variant = 'success') {
             const toast = document.createElement('div');
@@ -91,6 +109,7 @@
         }
 
         function renderPuzzle() {
+            updateLevelDisplay();
             targetEl.textContent = puzzle.target;
             numbersGrid.innerHTML = '';
             puzzle.numbers.forEach(num => {
@@ -118,6 +137,7 @@
                     showToast('Correct!', 'You solved the puzzle.');
                     resultMsg.className = 'text-center text-green-400';
                     resultMsg.textContent = 'Correct! Great job!';
+                    nextLevelBtn.style.display = 'inline-block';
                 } else {
                     showToast('Incorrect', `You got ${result}, not ${puzzle.target}`, 'error');
                     resultMsg.className = 'text-center text-red-500';
@@ -131,6 +151,14 @@
         }
 
         checkBtn.addEventListener('click', checkAnswer);
+        nextLevelBtn.addEventListener('click', function () {
+            level++;
+            puzzle = generatePuzzle(level);
+            exprInput.value = '';
+            resultMsg.textContent = '';
+            nextLevelBtn.style.display = 'none';
+            renderPuzzle();
+        });
         backBtn.addEventListener('click', () => window.location.href = '/games');
 
         renderPuzzle();
